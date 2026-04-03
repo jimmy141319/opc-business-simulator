@@ -1,165 +1,327 @@
 const state = {
   lang: 'zh',
-  country: 'taiwan',
-  goal: null,
-  situation: null,
+  country: 'tw',
+  cashGoal: null,
+  startType: null,
   path: null,
-  month: 0,
-  cash: 0,
-  clarity: 0,
-  stability: 0,
-  confidence: 0,
-  lastOutcome: null,
+  monthIndex: 0,
+  currentCash: 0,
+  clarity: 26,
+  stability: 24,
+  confidence: 24,
+  history: []
 };
 
 const app = document.getElementById('app');
+const topSubtitle = document.getElementById('top-subtitle');
 const langToggle = document.getElementById('langToggle');
-const t = (key) => GAME_DATA.langs[state.lang][key] || key;
 
-function clone(id){ return document.getElementById(id).content.firstElementChild.cloneNode(true); }
-function moneyValue(str){ return Number(String(str).replace(/[^\d]/g,'')) || 0; }
-function formatMoney(num){
-  const v = Math.max(0, Math.round(num));
-  return state.country === 'us' ? `US$${v.toLocaleString()}` : `NT$${v.toLocaleString()}`;
-}
-function goalOptions(){ return GAME_DATA.goals[state.country === 'us' ? 'en':'zh']; }
-function setTextScope(root){ root.querySelectorAll('[data-i18n]').forEach(el=> el.textContent = t(el.dataset.i18n)); document.querySelectorAll('[data-i18n]').forEach(el=>{ if(!root.contains(el) && el.closest('header')) el.textContent = t(el.dataset.i18n);}); }
-function render(){ setHeader();
-  if(!state.goal) return renderIntro();
-}
-function setHeader(){ document.documentElement.lang = state.lang === 'zh' ? 'zh-Hant' : 'en'; langToggle.textContent = state.lang === 'zh' ? 'EN' : '中文'; document.querySelectorAll('[data-i18n]').forEach(el => { if(el.closest('header')) el.textContent = t(el.dataset.i18n);}); }
-function goIntro(){ const node = clone('intro-template'); setTextScope(node); node.querySelector('[data-action="go-goal"]').onclick = goGoal; app.replaceChildren(node); }
-function goGoal(){ const node = clone('goal-template'); setTextScope(node); const list = node.querySelector('#goalList'); const cont = node.querySelector('#goalContinue'); goalOptions().forEach(g=>{
-    const btn = makeChoiceCard(g, state.lang==='zh' ? '把這個數字當成這一局的北極星。' : 'Use this as the north star for this run.', '');
-    btn.onclick = ()=>{ state.goal = g; [...list.children].forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); cont.classList.remove('hidden'); };
-    list.appendChild(btn);
-  });
-  cont.onclick = goSituation; app.replaceChildren(node);
-}
-function goSituation(){ const node = clone('situation-template'); setTextScope(node); const list=node.querySelector('#situationList'); const cont=node.querySelector('#situationContinue'); GAME_DATA.situations.forEach(s=>{
-  const btn = makeChoiceCard(s.title[state.lang], s.copy[state.lang], s.tag[state.lang]);
-  btn.onclick=()=>{ state.situation=s; [...list.children].forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); cont.classList.remove('hidden'); };
-  list.appendChild(btn);
-}); cont.onclick=goPath; app.replaceChildren(node); }
-function goPath(){ const node=clone('path-template'); setTextScope(node); const list=node.querySelector('#pathList'); const cont=node.querySelector('#pathContinue'); GAME_DATA.paths.forEach(p=>{
-  const btn=makeChoiceCard(p.title[state.lang], p.copy[state.lang], p.tag[state.lang]);
-  btn.onclick=()=>{ state.path=p; [...list.children].forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); cont.classList.remove('hidden'); };
-  list.appendChild(btn);
-}); cont.onclick=startRun; app.replaceChildren(node); }
-function startRun(){
-  state.month=0;
-  state.cash = state.situation.stats.cash * (state.country==='us'?80:1000);
-  state.clarity = state.situation.stats.clarity;
-  state.stability = state.situation.stats.stability;
-  state.confidence = state.situation.stats.confidence;
-  nextMonth();
-}
-function nextMonth(){
-  state.month += 1;
-  const monthData = GAME_DATA.months[state.path.id][state.month-1];
-  const node = clone('month-template'); setTextScope(node);
-  node.querySelector('#monthChip').textContent = state.lang==='zh' ? `第 ${state.month} 個月` : `Month ${state.month}`;
-  node.querySelector('#monthTitle').textContent = monthData.title[state.lang];
-  node.querySelector('#monthStep').textContent = `${state.month} / 3`;
-  node.querySelector('#hudTarget').textContent = state.goal;
-  node.querySelector('#hudCash').textContent = formatMoney(state.cash);
-  node.querySelector('#hudGap').textContent = formatMoney(Math.max(0, moneyValue(state.goal)-state.cash));
-  setBar(node.querySelector('#clarityBar'), state.clarity);
-  setBar(node.querySelector('#stabilityBar'), state.stability);
-  setBar(node.querySelector('#confidenceBar'), state.confidence);
-  node.querySelector('#eventTitle').textContent = monthData.title[state.lang];
-  node.querySelector('#eventCopy').textContent = monthData.copy[state.lang];
-  const optList = node.querySelector('#optionList');
-  monthData.options.forEach(opt=>{
-    const card = document.createElement('button');
-    card.className='option-card';
-    card.innerHTML = `<div class="option-top">${opt.title[state.lang]}</div><div class="option-middle">${opt.copy[state.lang]}</div><div class="option-bottom"><span class="mini-pill">${state.lang==='zh'?'按一下揭曉':'Tap to reveal'}</span><span class="mini-pill">${state.lang==='zh'?'本月選擇':'This month\'s move'}</span></div>`;
-    card.onclick = ()=>applyOption(opt);
-    optList.appendChild(card);
-  });
-  app.replaceChildren(node);
-}
-function applyOption(opt){
-  state.cash += opt.effect.cash;
-  state.clarity = clamp(state.clarity + opt.effect.clarity);
-  state.stability = clamp(state.stability + opt.effect.stability);
-  state.confidence = clamp(state.confidence + opt.effect.confidence);
-  state.lastOutcome = opt;
-  showReveal();
-}
-function showReveal(){
-  const node = clone('reveal-template'); setTextScope(node);
-  node.querySelector('#revealChip').textContent = state.lang==='zh' ? `第 ${state.month} 個月揭曉` : `Month ${state.month} Revealed`;
-  node.querySelector('#revealTitle').textContent = state.lastOutcome.title[state.lang];
-  node.querySelector('#revealTarget').textContent = state.goal;
-  node.querySelector('#revealCash').textContent = formatMoney(state.cash);
-  node.querySelector('#revealGap').textContent = formatMoney(Math.max(0, moneyValue(state.goal)-state.cash));
-  node.querySelector('#mentorText').textContent = state.lastOutcome.mentor[state.lang];
-  node.querySelector('#lessonText').textContent = state.lastOutcome.lesson[state.lang];
-  const nextBtn = node.querySelector('#revealNext');
-  if(state.month < 3){ nextBtn.textContent = state.lang==='zh' ? '進入下一個月' : 'Go to Next Month'; nextBtn.onclick = nextMonth; }
-  else { nextBtn.textContent = state.lang==='zh' ? '看本局總結' : 'See Run Summary'; nextBtn.onclick = showSummary; }
-  app.replaceChildren(node);
-}
-function showSummary(){
-  const node = clone('summary-template'); setTextScope(node);
-  const gap = Math.max(0, moneyValue(state.goal)-state.cash);
-  const pathName = state.path.title[state.lang];
-  node.querySelector('#summaryHeadline').textContent = state.lang==='zh'
-    ? (gap===0 ? '你這一局已經碰到目標了。' : '你還沒到目標，但你已經更知道差距從哪裡來。')
-    : (gap===0 ? 'You touched your goal in this run.' : 'You are not there yet, but you understand the gap much better now.');
-  node.querySelector('#summaryCopy').textContent = state.lang==='zh'
-    ? '這一局真正的收穫，不只是數字，而是你開始知道哪種路適合你，哪種壓力不值得硬扛。'
-    : 'The real gain in this run is not just the number. It is that you now understand which path fits you and which pressure is not worth carrying.';
-  node.querySelector('#summaryPath').textContent = pathName;
-  node.querySelector('#summaryPressure').textContent = pressureText(gap);
-  node.querySelector('#summaryNext').textContent = nextText(gap);
-  node.querySelector('[data-action="replay"]').onclick = ()=>{ state.goal=null; state.situation=null; state.path=null; goIntro(); };
-  node.querySelector('[data-action="repath"]').onclick = ()=>{ state.path=null; goPath(); };
-  app.replaceChildren(node);
-}
-function pressureText(gap){
-  if(state.lang==='zh'){
-    if(gap===0) return '現在最重要的是把節奏站穩';
-    if(gap > moneyValue(state.goal)*0.6) return '收入產能還不夠';
-    if(state.stability < 28) return '現金流穩定度還偏低';
-    return '下一步需要更聚焦';
-  }
-  if(gap===0) return 'Keeping the rhythm stable now matters most';
-  if(gap > moneyValue(state.goal)*0.6) return 'Income capacity is still too limited';
-  if(state.stability < 28) return 'Cash flow stability is still fragile';
-  return 'The next move needs more focus';
-}
-function nextText(gap){
-  if(state.lang==='zh'){
-    if(gap===0) return '你已經看到一條可行路。下一輪可以試著把它做得更穩，或換一條路比較看看。';
-    return '下一輪你可以保留這個目標，但換一條路再試一次。你會更快看出，什麼是值得你長期走的。';
-  }
-  if(gap===0) return 'You have seen a workable path. In the next run, either make it steadier or compare it with another route.';
-  return 'Keep the same target for the next run, but try another path. You will see faster what is worth building long term.';
-}
-function makeChoiceCard(title, copy, tag){
-  const btn=document.createElement('button'); btn.className='choice-card';
-  btn.innerHTML = `<div class="choice-title">${title}</div><div class="choice-copy">${copy}</div>${tag?`<div class="choice-tag">${tag}</div>`:''}`;
-  return btn;
-}
-function setBar(el,val){ el.style.width = `${Math.max(8,Math.min(100,val))}%`; }
-function clamp(v){ return Math.max(0, Math.min(100, v)); }
-langToggle.onclick = ()=>{
+langToggle.addEventListener('click', () => {
   state.lang = state.lang === 'zh' ? 'en' : 'zh';
-  const current = app.firstElementChild;
-  if(!current) return goIntro();
-  const id = current.className;
-  // rerender current stage based on state
-  if(!state.goal) return goIntro();
-  if(state.goal && !state.situation) return goGoal();
-  if(state.situation && !state.path) return goPath();
-  if(state.path && state.month===0) return goPath();
-  if(state.path && state.month>0 && current.classList.contains('run-screen')) { state.month -=1; return nextMonth(); }
-  if(current.classList.contains('reveal-screen')) return showReveal();
-  if(current.classList.contains('summary-screen')) return showSummary();
-};
+  render();
+});
 
-// initial flow
-function init(){ goIntro(); }
-init();
+function t() { return window.GAME_DATA[state.lang]; }
+function clamp(v){ return Math.max(0, Math.min(100, v)); }
+function currency(v) {
+  if (state.country === 'us') {
+    return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(v || 0);
+  }
+  return 'NT$' + Math.round(v || 0).toLocaleString('zh-Hant-TW');
+}
+function cashBaseGoalValue(optionValue) {
+  return optionValue;
+}
+function getGoalOptions() {
+  return t().cashGoal.options;
+}
+function getStartOption(key) { return t().starts.options.find(x=>x.key===key); }
+function getPathOption(key) { return t().paths.options.find(x=>x.key===key); }
+
+function renderLanding() {
+  const c = t().landing;
+  app.innerHTML = `
+  <section class="screen hero">
+    <div class="hero-kicker">🎮 ${c.kicker}</div>
+    <div class="hero-title">${c.title.replace(/\n/g, '<br>')}</div>
+    <div class="hero-copy">${c.copy}</div>
+    <div class="hero-scene">
+      <div class="avatar">🧑‍💼</div>
+      <div class="scene-note">${c.note}</div>
+    </div>
+    <div class="actions">
+      <button class="primary-btn" id="startGame">${c.start}</button>
+    </div>
+  </section>
+  `;
+  document.getElementById('startGame').onclick = renderCashGoal;
+}
+
+function renderCashGoal() {
+  const c = t().cashGoal;
+  app.innerHTML = `
+    <section class="screen">
+      <div class="progress-wrap">
+        <div class="progress-chip">1 / 4</div>
+        <div class="progress-chip">🎯 ${state.lang === 'zh' ? '設定目標' : 'Set goal'}</div>
+      </div>
+      <div class="section">
+        <h1 class="section-title">${c.title}</h1>
+        <div class="section-copy">${c.copy}</div>
+        <div class="card-grid" id="goalGrid"></div>
+        <div class="actions">
+          <button class="primary-btn" id="goalNext" disabled>${c.cta}</button>
+        </div>
+      </div>
+    </section>`;
+  const grid = document.getElementById('goalGrid');
+  c.options.forEach(opt => {
+    const div = document.createElement('button');
+    div.className = 'choice-card';
+    div.innerHTML = `<div class="choice-top"><div class="choice-title">${opt.label}</div><div class="choice-icon">💵</div></div><div class="choice-desc">${state.lang==='zh' ? '這一局你真正想拿到手的現金。' : 'The amount of cash you truly want to take home in this run.'}</div><div class="choice-tag">${opt.tag}</div>`;
+    div.onclick = () => {
+      state.cashGoal = cashBaseGoalValue(opt.value);
+      [...grid.children].forEach(x=>x.classList.remove('selected'));
+      div.classList.add('selected');
+      document.getElementById('goalNext').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+  document.getElementById('goalNext').onclick = renderStartType;
+}
+
+function renderStartType() {
+  const c = t().starts;
+  app.innerHTML = `
+    <section class="screen">
+      <div class="progress-wrap">
+        <div class="progress-chip">2 / 4</div>
+        <div class="progress-chip">🧭 ${state.lang === 'zh' ? '你的起點' : 'Your start'}</div>
+      </div>
+      <div class="section">
+        <h1 class="section-title">${c.title}</h1>
+        <div class="section-copy">${c.copy}</div>
+        <div class="card-grid" id="startGrid"></div>
+        <div class="actions"><button class="primary-btn" id="startNext" disabled>${c.cta}</button></div>
+      </div>
+    </section>`;
+  const grid = document.getElementById('startGrid');
+  c.options.forEach(opt => {
+    const div = document.createElement('button');
+    div.className = 'choice-card';
+    div.innerHTML = `<div class="choice-top"><div class="choice-title">${opt.title}</div><div class="choice-icon">${opt.icon}</div></div><div class="choice-desc">${opt.desc}</div><div class="choice-tag">${opt.tag}</div>`;
+    div.onclick = () => {
+      state.startType = opt.key;
+      [...grid.children].forEach(x=>x.classList.remove('selected'));
+      div.classList.add('selected');
+      document.getElementById('startNext').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+  document.getElementById('startNext').onclick = renderPath;
+}
+
+function renderPath() {
+  const c = t().paths;
+  app.innerHTML = `
+    <section class="screen">
+      <div class="progress-wrap">
+        <div class="progress-chip">3 / 4</div>
+        <div class="progress-chip">🛤️ ${state.lang === 'zh' ? '你的第一條路' : 'Your first path'}</div>
+      </div>
+      <div class="section">
+        <h1 class="section-title">${c.title}</h1>
+        <div class="section-copy">${c.copy}</div>
+        <div class="card-grid" id="pathGrid"></div>
+        <div class="actions"><button class="primary-btn" id="pathNext" disabled>${c.cta}</button></div>
+      </div>
+    </section>`;
+  const grid = document.getElementById('pathGrid');
+  c.options.forEach(opt => {
+    const div = document.createElement('button');
+    div.className = 'choice-card';
+    div.innerHTML = `<div class="choice-top"><div class="choice-title">${opt.title}</div><div class="choice-icon">${opt.icon}</div></div><div class="choice-desc">${opt.desc}</div><div class="choice-tag">${opt.tag}</div>`;
+    div.onclick = () => {
+      state.path = opt.key;
+      [...grid.children].forEach(x=>x.classList.remove('selected'));
+      div.classList.add('selected');
+      document.getElementById('pathNext').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+  document.getElementById('pathNext').onclick = startGame;
+}
+
+function startGame() {
+  state.monthIndex = 0;
+  state.history = [];
+  state.clarity = state.startType === 'stable' ? 34 : state.startType === 'pressure' ? 24 : 18;
+  state.stability = state.startType === 'stable' ? 36 : state.startType === 'pressure' ? 22 : 14;
+  state.confidence = state.startType === 'stable' ? 34 : state.startType === 'pressure' ? 24 : 16;
+  state.currentCash = state.startType === 'stable' ? Math.round(state.cashGoal * 0.28) : state.startType === 'pressure' ? Math.round(state.cashGoal * 0.18) : Math.round(state.cashGoal * 0.08);
+  renderMonth();
+}
+
+function renderMonth() {
+  const m = t().months[state.monthIndex];
+  const labels = t().labels;
+  const gap = Math.max(0, state.cashGoal - state.currentCash);
+  app.innerHTML = `
+    <section class="screen">
+      <div class="progress-wrap">
+        <div class="progress-chip">${m.badge}</div>
+        <div class="progress-chip">🎲 ${state.lang === 'zh' ? '回合進行中' : 'Run in progress'}</div>
+      </div>
+      <section class="event-card">
+        <div class="event-badge">${m.badge}</div>
+        <div class="event-title">${m.title}</div>
+        <div class="event-copy">${m.copy}</div>
+        <div class="event-visual">
+          <div class="event-emoji">🏢</div>
+          <div>
+            <div style="font-weight:800; margin-bottom:4px;">${m.visualTitle}</div>
+            <div style="color:var(--muted); line-height:1.6; font-size:13px;">${m.visualCopy}</div>
+          </div>
+        </div>
+      </section>
+      <section class="company-panel">
+        <div class="metric"><div class="metric-title">${labels.cashGoal}</div><div class="metric-value">${currency(state.cashGoal)}</div></div>
+        <div class="metric"><div class="metric-title">${labels.actualCash}</div><div class="metric-value">${currency(state.currentCash)}</div></div>
+        <div class="metric"><div class="metric-title">${labels.gap}</div><div class="metric-value">${currency(gap)}</div></div>
+        <div class="metric"><div class="metric-title">${getPathOption(state.path).title}</div><div class="metric-value">${getStartOption(state.startType).title}</div></div>
+      </section>
+      <section class="choice-card section">
+        <div class="choice-top"><div class="choice-title">${state.lang === 'zh' ? '公司狀態' : 'Company state'}</div><div class="choice-icon">📊</div></div>
+        <div class="choice-desc">${state.lang === 'zh' ? '這不是成績單，而是你這一局的當前體感。' : 'This is not a grade. It is how this run currently feels.'}</div>
+        <div class="summary-list">
+          <div class="summary-item"><div class="summary-label">${labels.clarity}</div><div class="meter"><span style="width:${state.clarity}%"></span></div></div>
+          <div class="summary-item"><div class="summary-label">${labels.stability}</div><div class="meter"><span style="width:${state.stability}%"></span></div></div>
+          <div class="summary-item"><div class="summary-label">${labels.confidence}</div><div class="meter"><span style="width:${state.confidence}%"></span></div></div>
+        </div>
+      </section>
+      <section class="section">
+        <h2 class="section-title">${state.lang === 'zh' ? '這個月你要怎麼應對？' : 'How do you want to respond this month?'}</h2>
+        <div class="event-choices" id="monthChoices"></div>
+      </section>
+      <div class="footer-gap"></div>
+    </section>
+  `;
+  const wrap = document.getElementById('monthChoices');
+  m.choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `${choice.title}<small>${choice.desc}</small>`;
+    btn.onclick = () => applyChoice(choice, m);
+    wrap.appendChild(btn);
+  });
+}
+
+function applyChoice(choice, monthData) {
+  state.currentCash += choice.effects.cash;
+  state.clarity = clamp(state.clarity + choice.effects.clarity);
+  state.stability = clamp(state.stability + choice.effects.stability);
+  state.confidence = clamp(state.confidence + choice.effects.confidence);
+  state.history.push({ month: state.monthIndex + 1, choice: choice.title, result: choice.result });
+  renderResult(choice, monthData);
+}
+
+function renderResult(choice, monthData) {
+  const labels = t().labels;
+  const gap = Math.max(0, state.cashGoal - state.currentCash);
+  app.innerHTML = `
+    <section class="screen">
+      <div class="progress-wrap">
+        <div class="progress-chip">${monthData.badge}</div>
+        <div class="progress-chip">✨ ${state.lang === 'zh' ? '結果揭曉' : 'Result revealed'}</div>
+      </div>
+      <section class="result-panel">
+        <div class="result-title">${state.lang === 'zh' ? '這一回合，你做了一個選擇。' : 'This turn, you made a move.'}</div>
+        <div class="result-copy">${choice.result}</div>
+      </section>
+      <section class="company-panel section">
+        <div class="metric"><div class="metric-title">${labels.cashGoal}</div><div class="metric-value">${currency(state.cashGoal)}</div></div>
+        <div class="metric"><div class="metric-title">${labels.actualCash}</div><div class="metric-value">${currency(state.currentCash)}</div></div>
+        <div class="metric"><div class="metric-title">${labels.gap}</div><div class="metric-value">${currency(gap)}</div></div>
+        <div class="metric"><div class="metric-title">${state.lang === 'zh' ? '這局感受' : 'Run feeling'}</div><div class="metric-value">${gap <= state.cashGoal * 0.4 ? (state.lang === 'zh' ? '開始靠近' : 'Getting closer') : (state.lang === 'zh' ? '還在追趕' : 'Still chasing')}</div></div>
+      </section>
+      <section class="npc-card">
+        <div class="npc-avatar">🧑‍🏫</div>
+        <div>
+          <div class="npc-name">${state.lang === 'zh' ? 'AI 貴人顧問' : 'AI mentor'}</div>
+          <div class="npc-copy">${monthData.npc}</div>
+        </div>
+      </section>
+      <div class="actions section">
+        <button class="primary-btn" id="nextBtn">${state.monthIndex < t().months.length - 1 ? labels.next : labels.finish}</button>
+      </div>
+    </section>
+  `;
+  document.getElementById('nextBtn').onclick = () => {
+    if (state.monthIndex < t().months.length - 1) {
+      state.monthIndex += 1;
+      renderMonth();
+    } else {
+      renderSummary();
+    }
+  };
+}
+
+function deriveLesson() {
+  if (state.stability >= state.confidence && state.stability >= state.clarity) {
+    return state.lang === 'zh' ? '先穩住現金流，比表面成長更重要。' : 'Stability matters more than surface growth.';
+  }
+  if (state.clarity >= state.confidence) {
+    return state.lang === 'zh' ? '看懂差距從哪裡來，本身就是能力。' : 'Understanding where the gap comes from is already a skill.';
+  }
+  return state.lang === 'zh' ? '信心不是靠想像來的，而是靠一回合一回合建立起來。' : 'Confidence is built one turn at a time.';
+}
+
+function renderSummary() {
+  const s = t().summary;
+  const labels = t().labels;
+  const gap = Math.max(0, state.cashGoal - state.currentCash);
+  const closer = gap <= state.cashGoal * 0.4;
+  const bestPath = getPathOption(state.path).title;
+  app.innerHTML = `
+    <section class="screen">
+      <section class="hero">
+        <div class="hero-kicker">🏁 ${s.title}</div>
+        <div class="hero-title">${closer ? s.closer : s.stillFar}</div>
+        <div class="hero-copy">${s.copy}</div>
+        <div class="hero-scene">
+          <div class="avatar">🏆</div>
+          <div class="scene-note">${s.mentor}</div>
+        </div>
+      </section>
+      <section class="summary-card section">
+        <div class="summary-list">
+          <div class="summary-item"><div class="summary-label">${labels.cashGoal}</div><div class="summary-value">${currency(state.cashGoal)}</div></div>
+          <div class="summary-item"><div class="summary-label">${labels.actualCash}</div><div class="summary-value">${currency(state.currentCash)}</div></div>
+          <div class="summary-item"><div class="summary-label">${labels.gap}</div><div class="summary-value">${currency(gap)}</div></div>
+          <div class="summary-item"><div class="summary-label">${s.bestPath}</div><div class="summary-value">${bestPath}</div></div>
+          <div class="summary-item"><div class="summary-label">${s.lesson}</div><div class="summary-value">${deriveLesson()}</div></div>
+          <div class="summary-item"><div class="summary-label">${s.company}</div><div class="summary-value">${closer ? s.stateGood : s.stateTense}</div></div>
+        </div>
+      </section>
+      <section class="npc-card section">
+        <div class="npc-avatar">🤝</div>
+        <div>
+          <div class="npc-name">${s.mentorTitle}</div>
+          <div class="npc-copy">${s.mentor}</div>
+        </div>
+      </section>
+      <div class="actions section">
+        <button class="primary-btn" id="replayBtn">${labels.replay}</button>
+        <button class="secondary-btn" id="changeBtn">${labels.changePath}</button>
+      </div>
+    </section>
+  `;
+  document.getElementById('replayBtn').onclick = startGame;
+  document.getElementById('changeBtn').onclick = renderPath;
+}
+
+function render() {
+  topSubtitle.textContent = t().topSubtitle;
+  renderLanding();
+}
+render();

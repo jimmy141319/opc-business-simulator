@@ -1,160 +1,26 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>OPC Business Simulator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-shell">
-    <div class="bg-orb orb-a"></div>
-    <div class="bg-orb orb-b"></div>
     <header class="topbar">
-      <div>
-        <div class="eyebrow" data-i18n="brandEyebrow">Cash Goal Game</div>
-        <div class="brand">OPC Business Simulator</div>
+      <div class="brand-wrap">
+        <div class="brand-badge">OPC</div>
+        <div>
+          <div class="brand-title">OPC Business Simulator</div>
+          <div class="brand-sub" id="top-subtitle">Cash goal game</div>
+        </div>
       </div>
-      <button id="langToggle" class="ghost-btn">EN</button>
+      <button class="lang-toggle" id="langToggle">EN / 中文</button>
     </header>
 
     <main id="app"></main>
   </div>
-
-  <template id="intro-template">
-    <section class="screen intro-screen">
-      <div class="chapter-chip" data-i18n="introChapter">第 0 回合</div>
-      <h1 class="hero-title" data-i18n="introTitle">先選你每月想要的現金流</h1>
-      <p class="hero-copy" data-i18n="introCopy">這不是填表。這是一場把焦慮變成方向的模擬。你每做一次選擇，就會看到一條不同的路。</p>
-
-      <div class="story-card big-card">
-        <div class="story-label" data-i18n="introStoryLabel">今晚的起點</div>
-        <div class="story-title" data-i18n="introStoryTitle">你不是來證明自己，你是來找到能活下來、再慢慢變強的路。</div>
-      </div>
-
-      <button class="primary-btn" data-action="go-goal" data-i18n="introCta">開始這一局</button>
-    </section>
-  </template>
-
-  <template id="goal-template">
-    <section class="screen">
-      <div class="chapter-chip" data-i18n="goalChapter">第 1 步</div>
-      <h2 class="screen-title" data-i18n="goalTitle">你每月想要多少現金流？</h2>
-      <p class="screen-copy" data-i18n="goalCopy">先說出你真正想要的數字。系統會陪你測試：哪條路比較有機會靠近它。</p>
-      <div id="goalList" class="choice-list"></div>
-      <button class="secondary-btn hidden" id="goalContinue" data-action="go-situation" data-i18n="continue">繼續</button>
-    </section>
-  </template>
-
-  <template id="situation-template">
-    <section class="screen">
-      <div class="chapter-chip" data-i18n="situationChapter">第 2 步</div>
-      <h2 class="screen-title" data-i18n="situationTitle">你現在站在哪種起點？</h2>
-      <p class="screen-copy" data-i18n="situationCopy">你不需要證明自己過得很好。只要選最接近現在的狀態。</p>
-      <div id="situationList" class="choice-list"></div>
-      <button class="secondary-btn hidden" id="situationContinue" data-action="go-path" data-i18n="continue">繼續</button>
-    </section>
-  </template>
-
-  <template id="path-template">
-    <section class="screen">
-      <div class="chapter-chip" data-i18n="pathChapter">第 3 步</div>
-      <h2 class="screen-title" data-i18n="pathTitle">這一局，你想先走哪條路？</h2>
-      <p class="screen-copy" data-i18n="pathCopy">沒有完美路徑。我們先選一條，跑三個月，看它怎麼影響你的現金流。</p>
-      <div id="pathList" class="choice-list"></div>
-      <button class="secondary-btn hidden" id="pathContinue" data-action="start-run" data-i18n="startRun">開始第 1 個月</button>
-    </section>
-  </template>
-
-  <template id="month-template">
-    <section class="screen run-screen">
-      <div class="month-head">
-        <div>
-          <div class="chapter-chip" id="monthChip">第 1 個月</div>
-          <h2 class="screen-title compact" id="monthTitle"></h2>
-        </div>
-        <div class="month-step" id="monthStep">1 / 3</div>
-      </div>
-
-      <div class="hud-grid">
-        <div class="hud-card highlight">
-          <span data-i18n="targetLabel">目標</span>
-          <strong id="hudTarget"></strong>
-        </div>
-        <div class="hud-card">
-          <span data-i18n="cashLabel">目前現金流</span>
-          <strong id="hudCash"></strong>
-        </div>
-        <div class="hud-card danger">
-          <span data-i18n="gapLabel">差距</span>
-          <strong id="hudGap"></strong>
-        </div>
-      </div>
-
-      <div class="status-card">
-        <div class="status-row"><span data-i18n="clarity">清晰度</span><div class="bar"><i id="clarityBar"></i></div></div>
-        <div class="status-row"><span data-i18n="stability">穩定度</span><div class="bar"><i id="stabilityBar"></i></div></div>
-        <div class="status-row"><span data-i18n="confidence">信心度</span><div class="bar"><i id="confidenceBar"></i></div></div>
-      </div>
-
-      <div class="event-card">
-        <div class="story-label" data-i18n="monthEventLabel">本月事件</div>
-        <div class="event-title" id="eventTitle"></div>
-        <p class="event-copy" id="eventCopy"></p>
-      </div>
-
-      <div id="optionList" class="option-stack"></div>
-    </section>
-  </template>
-
-  <template id="reveal-template">
-    <section class="screen reveal-screen">
-      <div class="chapter-chip" id="revealChip">本月揭曉</div>
-      <h2 class="screen-title" id="revealTitle"></h2>
-      <div class="result-card big-card">
-        <div class="result-grid">
-          <div><span data-i18n="targetLabel">目標</span><strong id="revealTarget"></strong></div>
-          <div><span data-i18n="cashLabel">本月現金流</span><strong id="revealCash"></strong></div>
-          <div><span data-i18n="gapLabel">差距</span><strong id="revealGap"></strong></div>
-        </div>
-      </div>
-      <div class="mentor-card">
-        <div class="story-label" data-i18n="mentorLabel">貴人提醒</div>
-        <p id="mentorText"></p>
-      </div>
-      <div class="lesson-card">
-        <div class="story-label" data-i18n="lessonLabel">這次你學到</div>
-        <p id="lessonText"></p>
-      </div>
-      <button class="primary-btn" id="revealNext"></button>
-    </section>
-  </template>
-
-  <template id="summary-template">
-    <section class="screen summary-screen">
-      <div class="chapter-chip" data-i18n="summaryChapter">本局總結</div>
-      <h2 class="screen-title" data-i18n="summaryTitle">你已經比剛開始更懂了</h2>
-      <div class="big-card summary-hero">
-        <div class="story-title" id="summaryHeadline"></div>
-        <p id="summaryCopy"></p>
-      </div>
-      <div class="summary-grid">
-        <div class="summary-card"><span data-i18n="bestPath">目前最適合的路</span><strong id="summaryPath"></strong></div>
-        <div class="summary-card"><span data-i18n="mainPressure">最大壓力點</span><strong id="summaryPressure"></strong></div>
-      </div>
-      <div class="mentor-card">
-        <div class="story-label" data-i18n="nextStepLabel">下一步</div>
-        <p id="summaryNext"></p>
-      </div>
-      <div class="actions-row">
-        <button class="secondary-btn" data-action="replay" data-i18n="replay">再玩一次</button>
-        <button class="primary-btn" data-action="repath" data-i18n="changePath">換條路試試</button>
-      </div>
-    </section>
-  </template>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
