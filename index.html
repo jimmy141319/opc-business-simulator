@@ -2,24 +2,24 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>OPC Business Simulator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-shell">
+  <div id="app" class="app">
     <header class="topbar">
       <div class="brand-wrap">
         <div class="brand-badge">OPC</div>
         <div>
           <div class="brand-title">OPC Business Simulator</div>
-          <div class="brand-sub" id="top-subtitle">Cash goal game</div>
+          <div class="brand-sub" id="brandSub">像線上遊戲一樣，玩出你的現金流之路</div>
         </div>
       </div>
-      <button class="lang-toggle" id="langToggle">EN / 中文</button>
+      <button id="langToggle" class="pill ghost">EN / 中文</button>
     </header>
 
-    <main id="app"></main>
+    <main id="screen" class="screen"></main>
   </div>
 
   <script src="data.js"></script>

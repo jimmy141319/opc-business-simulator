@@ -1,11 +1,16 @@
-OPC Business Simulator - Gamefeel V3
+OPC Business Simulator - Gamefeel V4
 
-Upload these files directly to the root of your GitHub Pages repo.
-Do not upload the outer folder.
-
+Upload directly to your GitHub Pages repo root.
 Files:
 - index.html
 - style.css
 - data.js
 - app.js
 - README.txt
+
+This version is more game-like:
+- Round-based flow
+- Story-style opening
+- Event cards
+- Mentor dialogue
+- Reveal-style result screen
