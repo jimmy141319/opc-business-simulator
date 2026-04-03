@@ -1,250 +1,165 @@
 const state = {
   lang: 'zh',
-  country: null,
+  country: 'taiwan',
   goal: null,
   situation: null,
   path: null,
-  month: 1,
-  totalMonths: 3,
-  actual: 0,
-  clarity: 28,
-  stability: 25,
-  confidence: 30,
-  history: []
+  month: 0,
+  cash: 0,
+  clarity: 0,
+  stability: 0,
+  confidence: 0,
+  lastOutcome: null,
 };
 
-const screenContainer = document.getElementById('screenContainer');
-document.getElementById('langToggle').addEventListener('click', () => {
-  state.lang = state.lang === 'zh' ? 'en' : 'zh';
-  render(currentScreen);
-});
+const app = document.getElementById('app');
+const langToggle = document.getElementById('langToggle');
+const t = (key) => GAME_DATA.langs[state.lang][key] || key;
 
-let currentScreen = 'landing';
-
-function t(){ return window.APP_DATA[state.lang]; }
-
-function currencyText(n){
-  return state.country === 'us' ? `US$${n.toLocaleString()}` : `NT$${n.toLocaleString()}`;
+function clone(id){ return document.getElementById(id).content.firstElementChild.cloneNode(true); }
+function moneyValue(str){ return Number(String(str).replace(/[^\d]/g,'')) || 0; }
+function formatMoney(num){
+  const v = Math.max(0, Math.round(num));
+  return state.country === 'us' ? `US$${v.toLocaleString()}` : `NT$${v.toLocaleString()}`;
 }
-
-function goalNumeric(goalText){
-  const digits = goalText.replace(/[^\d]/g,'');
-  return Number(digits || 0);
+function goalOptions(){ return GAME_DATA.goals[state.country === 'us' ? 'en':'zh']; }
+function setTextScope(root){ root.querySelectorAll('[data-i18n]').forEach(el=> el.textContent = t(el.dataset.i18n)); document.querySelectorAll('[data-i18n]').forEach(el=>{ if(!root.contains(el) && el.closest('header')) el.textContent = t(el.dataset.i18n);}); }
+function render(){ setHeader();
+  if(!state.goal) return renderIntro();
 }
-
-function shell(inner){
-  screenContainer.innerHTML = `<section class="screen">${inner}</section>`;
+function setHeader(){ document.documentElement.lang = state.lang === 'zh' ? 'zh-Hant' : 'en'; langToggle.textContent = state.lang === 'zh' ? 'EN' : '中文'; document.querySelectorAll('[data-i18n]').forEach(el => { if(el.closest('header')) el.textContent = t(el.dataset.i18n);}); }
+function goIntro(){ const node = clone('intro-template'); setTextScope(node); node.querySelector('[data-action="go-goal"]').onclick = goGoal; app.replaceChildren(node); }
+function goGoal(){ const node = clone('goal-template'); setTextScope(node); const list = node.querySelector('#goalList'); const cont = node.querySelector('#goalContinue'); goalOptions().forEach(g=>{
+    const btn = makeChoiceCard(g, state.lang==='zh' ? '把這個數字當成這一局的北極星。' : 'Use this as the north star for this run.', '');
+    btn.onclick = ()=>{ state.goal = g; [...list.children].forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); cont.classList.remove('hidden'); };
+    list.appendChild(btn);
+  });
+  cont.onclick = goSituation; app.replaceChildren(node);
 }
-
-function renderLanding(){
-  const d = t();
-  shell(`
-    <div class="hero">
-      <span class="pill">Mobile MVP</span>
-      <h1>${d.landingTitle}</h1>
-      <p>${d.landingBody}</p>
-      <button class="cta" data-next="country">${d.start}</button>
-    </div>
-    <div class="section-title">${d.chooseLanguage}</div>
-    <div class="grid2">
-      <button class="choice" data-lang="zh"><div class="eyebrow">Traditional Chinese</div><h3>繁體中文</h3><p>比較貼近情緒與生活語感。</p></button>
-      <button class="choice" data-lang="en"><div class="eyebrow">English</div><h3>English</h3><p>Use the English-first product version.</p></button>
-    </div>
-  `);
-  bindCommon();
-  [...document.querySelectorAll('[data-lang]')].forEach(btn=>btn.onclick=()=>{state.lang=btn.dataset.lang; renderLanding();});
-}
-
-function renderCountry(){
-  const d=t();
-  shell(`
-    <div class="section-title">${d.chooseCountry}</div>
-    ${d.countries.map(c=>`
-      <button class="choice" data-country="${c.id}">
-        <div class="eyebrow">Context</div>
-        <h3>${c.title}</h3>
-        <p>${c.body}</p>
-      </button>`).join('')}
-  `);
-  document.querySelectorAll('[data-country]').forEach(btn=>btn.onclick=()=>{state.country=btn.dataset.country; currentScreen='goal'; render('goal');});
-}
-
-function renderGoal(){
-  const d=t();
-  const goals = d.goals[state.country || 'tw'];
-  shell(`
-    <div class="month-head"><div class="mini">Cash Goal First</div><h2>${d.chooseGoal}</h2><p>${d.goalBody}</p></div>
-    ${goals.map(g=>`<button class="choice" data-goal="${g}"><div class="eyebrow">Target</div><h3>${g}</h3><p>${state.lang==='zh'?'先誠實選一個你想接近的數字。':'Choose the number you want to move toward first.'}</p></button>`).join('')}
-  `);
-  document.querySelectorAll('[data-goal]').forEach(btn=>btn.onclick=()=>{state.goal=btn.dataset.goal; currentScreen='situation'; render('situation');});
-}
-
-function renderSituation(){
-  const d=t();
-  shell(`
-    <div class="section-title">${d.chooseSituation}</div>
-    ${d.situations.map(s=>`<button class="choice" data-situation="${s.id}"><span class="pill">${s.tag}</span><h3>${s.title}</h3><p>${s.body}</p></button>`).join('')}
-  `);
-  document.querySelectorAll('[data-situation]').forEach(btn=>btn.onclick=()=>{state.situation=btn.dataset.situation; currentScreen='path'; render('path');});
-}
-
-function renderPath(){
-  const d=t();
-  shell(`
-    <div class="section-title">${d.choosePath}</div>
-    ${d.paths.map(p=>`<button class="choice" data-path="${p.id}"><div class="eyebrow">${p.eyebrow}</div><h3>${p.title}</h3><p>${p.body}</p><div class="meta">${p.meta}</div></button>`).join('')}
-  `);
-  document.querySelectorAll('[data-path]').forEach(btn=>btn.onclick=()=>{state.path=btn.dataset.path; startRun(); currentScreen='month'; render('month');});
-}
-
+function goSituation(){ const node = clone('situation-template'); setTextScope(node); const list=node.querySelector('#situationList'); const cont=node.querySelector('#situationContinue'); GAME_DATA.situations.forEach(s=>{
+  const btn = makeChoiceCard(s.title[state.lang], s.copy[state.lang], s.tag[state.lang]);
+  btn.onclick=()=>{ state.situation=s; [...list.children].forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); cont.classList.remove('hidden'); };
+  list.appendChild(btn);
+}); cont.onclick=goPath; app.replaceChildren(node); }
+function goPath(){ const node=clone('path-template'); setTextScope(node); const list=node.querySelector('#pathList'); const cont=node.querySelector('#pathContinue'); GAME_DATA.paths.forEach(p=>{
+  const btn=makeChoiceCard(p.title[state.lang], p.copy[state.lang], p.tag[state.lang]);
+  btn.onclick=()=>{ state.path=p; [...list.children].forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); cont.classList.remove('hidden'); };
+  list.appendChild(btn);
+}); cont.onclick=startRun; app.replaceChildren(node); }
 function startRun(){
-  state.month=1; state.history=[]; state.clarity=28; state.stability=25; state.confidence=30; 
-  state.actual = Math.round(goalNumeric(state.goal) * initialRatio());
+  state.month=0;
+  state.cash = state.situation.stats.cash * (state.country==='us'?80:1000);
+  state.clarity = state.situation.stats.clarity;
+  state.stability = state.situation.stats.stability;
+  state.confidence = state.situation.stats.confidence;
+  nextMonth();
 }
-
-function initialRatio(){
-  let base = 0.36;
-  if(state.path==='opc') base = 0.42;
-  if(state.path==='smallbiz') base = 0.40;
-  if(state.path==='asset') base = 0.33;
-  if(state.path==='mixed') base = 0.38;
-  if(state.situation==='pressure') base -= 0.05;
-  if(state.situation==='debt') base -= 0.10;
-  return Math.max(0.18, base);
+function nextMonth(){
+  state.month += 1;
+  const monthData = GAME_DATA.months[state.path.id][state.month-1];
+  const node = clone('month-template'); setTextScope(node);
+  node.querySelector('#monthChip').textContent = state.lang==='zh' ? `第 ${state.month} 個月` : `Month ${state.month}`;
+  node.querySelector('#monthTitle').textContent = monthData.title[state.lang];
+  node.querySelector('#monthStep').textContent = `${state.month} / 3`;
+  node.querySelector('#hudTarget').textContent = state.goal;
+  node.querySelector('#hudCash').textContent = formatMoney(state.cash);
+  node.querySelector('#hudGap').textContent = formatMoney(Math.max(0, moneyValue(state.goal)-state.cash));
+  setBar(node.querySelector('#clarityBar'), state.clarity);
+  setBar(node.querySelector('#stabilityBar'), state.stability);
+  setBar(node.querySelector('#confidenceBar'), state.confidence);
+  node.querySelector('#eventTitle').textContent = monthData.title[state.lang];
+  node.querySelector('#eventCopy').textContent = monthData.copy[state.lang];
+  const optList = node.querySelector('#optionList');
+  monthData.options.forEach(opt=>{
+    const card = document.createElement('button');
+    card.className='option-card';
+    card.innerHTML = `<div class="option-top">${opt.title[state.lang]}</div><div class="option-middle">${opt.copy[state.lang]}</div><div class="option-bottom"><span class="mini-pill">${state.lang==='zh'?'按一下揭曉':'Tap to reveal'}</span><span class="mini-pill">${state.lang==='zh'?'本月選擇':'This month\'s move'}</span></div>`;
+    card.onclick = ()=>applyOption(opt);
+    optList.appendChild(card);
+  });
+  app.replaceChildren(node);
 }
-
-function renderMonth(){
-  const d=t();
-  const goalNum = goalNumeric(state.goal);
-  const gap = Math.max(goalNum - state.actual,0);
-  shell(`
-    <div class="month-head">
-      <div class="mini">Month ${state.month} / ${state.totalMonths}</div>
-      <h2>${state.lang==='zh'?`第 ${state.month} 個月`:`Month ${state.month}`}</h2>
-      <p>${d.monthIntro}</p>
-    </div>
-
-    <div class="stats">
-      <div class="stat-box"><div class="k">${state.lang==='zh'?'每月目標':'Cash Goal'}</div><div class="v">${state.goal}</div></div>
-      <div class="stat-box"><div class="k">${state.lang==='zh'?'本月現金':'This Month'}</div><div class="v">${currencyText(state.actual)}</div></div>
-      <div class="stat-box"><div class="k">${state.lang==='zh'?'差距':'Gap'}</div><div class="v">${currencyText(gap)}</div></div>
-    </div>
-
-    <div class="card bars">
-      ${barHtml(d.bars[0], state.clarity)}
-      ${barHtml(d.bars[1], state.stability)}
-      ${barHtml(d.bars[2], state.confidence)}
-    </div>
-
-    <div class="section-title">${d.decisionTitle}</div>
-    ${d.actions.map(a=>`<button class="choice" data-action="${a.id}"><div class="eyebrow">${a.eyebrow}</div><h3>${a.title}</h3><p>${a.body}</p></button>`).join('')}
-  `);
-  document.querySelectorAll('[data-action]').forEach(btn=>btn.onclick=()=>applyAction(btn.dataset.action));
+function applyOption(opt){
+  state.cash += opt.effect.cash;
+  state.clarity = clamp(state.clarity + opt.effect.clarity);
+  state.stability = clamp(state.stability + opt.effect.stability);
+  state.confidence = clamp(state.confidence + opt.effect.confidence);
+  state.lastOutcome = opt;
+  showReveal();
 }
-
-function barHtml(label,val){
-  return `<div class="bar"><div class="label"><span>${label}</span><span>${val}</span></div><div class="track"><div class="fill" style="width:${val}%"></div></div></div>`;
+function showReveal(){
+  const node = clone('reveal-template'); setTextScope(node);
+  node.querySelector('#revealChip').textContent = state.lang==='zh' ? `第 ${state.month} 個月揭曉` : `Month ${state.month} Revealed`;
+  node.querySelector('#revealTitle').textContent = state.lastOutcome.title[state.lang];
+  node.querySelector('#revealTarget').textContent = state.goal;
+  node.querySelector('#revealCash').textContent = formatMoney(state.cash);
+  node.querySelector('#revealGap').textContent = formatMoney(Math.max(0, moneyValue(state.goal)-state.cash));
+  node.querySelector('#mentorText').textContent = state.lastOutcome.mentor[state.lang];
+  node.querySelector('#lessonText').textContent = state.lastOutcome.lesson[state.lang];
+  const nextBtn = node.querySelector('#revealNext');
+  if(state.month < 3){ nextBtn.textContent = state.lang==='zh' ? '進入下一個月' : 'Go to Next Month'; nextBtn.onclick = nextMonth; }
+  else { nextBtn.textContent = state.lang==='zh' ? '看本局總結' : 'See Run Summary'; nextBtn.onclick = showSummary; }
+  app.replaceChildren(node);
 }
-
-function applyAction(action){
-  const goalNum = goalNumeric(state.goal);
-  let delta = 0;
-  let mentor = '';
-  let gain = '';
-  let pressure = '';
-  if(action==='lean'){
-    delta = 0.08; state.stability += 12; state.clarity += 6; state.confidence += 5;
-    mentor = state.lang==='zh' ? '你先把局勢穩住了。這種判斷，往往比急著放大更重要。' : 'You stabilized the board first. That judgment often matters more than rushing to expand.';
-    gain = state.lang==='zh' ? '你保住了現金流的底線。' : 'You protected the floor of your cash flow.';
-    pressure = state.lang==='zh' ? '成長速度還不快，但節奏更穩。' : 'Growth is still modest, but the rhythm is steadier.';
+function showSummary(){
+  const node = clone('summary-template'); setTextScope(node);
+  const gap = Math.max(0, moneyValue(state.goal)-state.cash);
+  const pathName = state.path.title[state.lang];
+  node.querySelector('#summaryHeadline').textContent = state.lang==='zh'
+    ? (gap===0 ? '你這一局已經碰到目標了。' : '你還沒到目標，但你已經更知道差距從哪裡來。')
+    : (gap===0 ? 'You touched your goal in this run.' : 'You are not there yet, but you understand the gap much better now.');
+  node.querySelector('#summaryCopy').textContent = state.lang==='zh'
+    ? '這一局真正的收穫，不只是數字，而是你開始知道哪種路適合你，哪種壓力不值得硬扛。'
+    : 'The real gain in this run is not just the number. It is that you now understand which path fits you and which pressure is not worth carrying.';
+  node.querySelector('#summaryPath').textContent = pathName;
+  node.querySelector('#summaryPressure').textContent = pressureText(gap);
+  node.querySelector('#summaryNext').textContent = nextText(gap);
+  node.querySelector('[data-action="replay"]').onclick = ()=>{ state.goal=null; state.situation=null; state.path=null; goIntro(); };
+  node.querySelector('[data-action="repath"]').onclick = ()=>{ state.path=null; goPath(); };
+  app.replaceChildren(node);
+}
+function pressureText(gap){
+  if(state.lang==='zh'){
+    if(gap===0) return '現在最重要的是把節奏站穩';
+    if(gap > moneyValue(state.goal)*0.6) return '收入產能還不夠';
+    if(state.stability < 28) return '現金流穩定度還偏低';
+    return '下一步需要更聚焦';
   }
-  if(action==='exposure'){
-    delta = 0.14; state.confidence += 8; state.clarity += 4; state.stability -= 3;
-    mentor = state.lang==='zh' ? '你選擇主動出擊。多一點曝光，確實會換來更多可能。' : 'You chose to make a move. More exposure can create more possibility.';
-    gain = state.lang==='zh' ? '收入機會被打開了一些。' : 'You opened the door to more income opportunities.';
-    pressure = state.lang==='zh' ? '這也會讓你的能量消耗更明顯。' : 'This can also increase the pressure on your energy.';
+  if(gap===0) return 'Keeping the rhythm stable now matters most';
+  if(gap > moneyValue(state.goal)*0.6) return 'Income capacity is still too limited';
+  if(state.stability < 28) return 'Cash flow stability is still fragile';
+  return 'The next move needs more focus';
+}
+function nextText(gap){
+  if(state.lang==='zh'){
+    if(gap===0) return '你已經看到一條可行路。下一輪可以試著把它做得更穩，或換一條路比較看看。';
+    return '下一輪你可以保留這個目標，但換一條路再試一次。你會更快看出，什麼是值得你長期走的。';
   }
-  if(action==='ai'){
-    delta = 0.11; state.clarity += 10; state.confidence += 7; state.stability += 2;
-    mentor = state.lang==='zh' ? '你開始用工具替自己換時間。這是一種成熟的放大方式。' : 'You used tools to buy back time. That is a mature form of leverage.';
-    gain = state.lang==='zh' ? '你的產能開始被放大。' : 'Your capacity is starting to scale.';
-    pressure = state.lang==='zh' ? '接下來要注意持續成本的節奏。' : 'Now the main thing is to manage recurring costs carefully.';
-  }
-  if(action==='borrow'){
-    delta = 0.09; state.stability += 4; state.confidence += 3; state.clarity += 8;
-    mentor = state.lang==='zh' ? '你先補上了眼前缺口。這不是退步，而是在爭取下一步的時間。' : 'You patched the immediate gap. This is not failure; it is buying time for the next move.';
-    gain = state.lang==='zh' ? '本月的壓力先被緩了一些。' : 'The pressure eased a little this month.';
-    pressure = state.lang==='zh' ? '但後面的利息與負擔，之後要一起看。' : 'But later, you will need to face the burden and cost that follow.';
-  }
-  const volatility = Math.random() * 0.04;
-  state.actual = Math.min(goalNum, Math.round(state.actual + goalNum * (delta + volatility)));
-  state.clarity = clamp(state.clarity); state.stability = clamp(state.stability); state.confidence = clamp(state.confidence);
-  state.history.push({month: state.month, action, mentor, gain, pressure, actual: state.actual});
-  renderResult(mentor, gain, pressure);
+  if(gap===0) return 'You have seen a workable path. In the next run, either make it steadier or compare it with another route.';
+  return 'Keep the same target for the next run, but try another path. You will see faster what is worth building long term.';
 }
-
-function clamp(v){ return Math.max(8, Math.min(100, v)); }
-
-function renderResult(mentor, gain, pressure){
-  const goalNum = goalNumeric(state.goal);
-  const gap = Math.max(goalNum - state.actual, 0);
-  shell(`
-    <div class="result-box">
-      <span class="pill">${state.lang==='zh'?'這個月的結果':'Result this month'}</span>
-      <h3>${state.lang==='zh'?'你又往前推了一步。':'You moved the run forward.'}</h3>
-      <p>${state.lang==='zh'?'你的目標':'Your target'}：<strong>${state.goal}</strong><br>${state.lang==='zh'?'本月現金流':'This month'}：<strong>${currencyText(state.actual)}</strong><br>${state.lang==='zh'?'差距':'Gap'}：<strong>${currencyText(gap)}</strong></p>
-    </div>
-    <div class="mentor-box">
-      <div class="title">${t().mentorTitle}</div>
-      <p>${mentor}</p>
-      <p style="margin-top:12px"><strong>${state.lang==='zh'?'這次的進步：':'Progress:'}</strong> ${gain}</p>
-      <p style="margin-top:10px"><strong>${state.lang==='zh'?'接下來要注意：':'Watch next:'}</strong> ${pressure}</p>
-    </div>
-    <button class="primary-btn" id="nextBtn">${state.month >= state.totalMonths ? t().summaryTitle : t().nextMonth}</button>
-  `);
-  document.getElementById('nextBtn').onclick = ()=>{
-    if(state.month >= state.totalMonths){ currentScreen='summary'; render('summary'); }
-    else { state.month += 1; currentScreen='month'; render('month'); }
-  };
+function makeChoiceCard(title, copy, tag){
+  const btn=document.createElement('button'); btn.className='choice-card';
+  btn.innerHTML = `<div class="choice-title">${title}</div><div class="choice-copy">${copy}</div>${tag?`<div class="choice-tag">${tag}</div>`:''}`;
+  return btn;
 }
+function setBar(el,val){ el.style.width = `${Math.max(8,Math.min(100,val))}%`; }
+function clamp(v){ return Math.max(0, Math.min(100, v)); }
+langToggle.onclick = ()=>{
+  state.lang = state.lang === 'zh' ? 'en' : 'zh';
+  const current = app.firstElementChild;
+  if(!current) return goIntro();
+  const id = current.className;
+  // rerender current stage based on state
+  if(!state.goal) return goIntro();
+  if(state.goal && !state.situation) return goGoal();
+  if(state.situation && !state.path) return goPath();
+  if(state.path && state.month===0) return goPath();
+  if(state.path && state.month>0 && current.classList.contains('run-screen')) { state.month -=1; return nextMonth(); }
+  if(current.classList.contains('reveal-screen')) return showReveal();
+  if(current.classList.contains('summary-screen')) return showSummary();
+};
 
-function renderSummary(){
-  const last = state.history[state.history.length-1];
-  const pathTitle = t().paths.find(p=>p.id===state.path)?.title || '';
-  const best = state.path==='opc' ? (state.lang==='zh'?'更聚焦地放大你的能力':'Focus on amplifying your capability') : state.path==='smallbiz' ? (state.lang==='zh'?'更清楚地管理毛利與節奏':'Manage margin and rhythm more clearly') : state.path==='asset' ? (state.lang==='zh'?'更耐心地看長短期平衡':'Balance short and long term more patiently') : (state.lang==='zh'?'把多條路拆成主次節奏':'Separate your multiple paths into a clearer order');
-  shell(`
-    <div class="summary-box">
-      <span class="badge">${state.lang==='zh'?'這一局完成':'Run complete'}</span>
-      <h3>${t().summaryTitle}</h3>
-      <p>${state.lang==='zh'?'你這次選擇的主路徑是':'Your main path this run was'} <strong>${pathTitle}</strong>。</p>
-      <p>${state.lang==='zh'?'你最需要補強的一件事是':'One thing to strengthen next is'}：<strong>${best}</strong></p>
-      <p>${state.lang==='zh'?'你現在比開始時更清楚，這本身就是很重要的收穫。':'You now have more clarity than when you started. That itself is a real gain.'}</p>
-    </div>
-    <div class="mentor-box">
-      <div class="title">${t().mentorTitle}</div>
-      <p>${state.lang==='zh'?'你的目標不小，但方向已經比一開始更像一條路了。先把節奏站穩，後面的選擇就會慢慢變多。':'Your goal is not small, but it already looks more like a path now. Stabilize the rhythm first, and more options will open later.'}</p>
-    </div>
-    <button class="primary-btn" id="againBtn">${t().playAgain}</button>
-    <button class="secondary-btn" id="switchBtn">${t().switchPath}</button>
-    <div class="footnote">GitHub Pages mobile MVP · game-feel version</div>
-  `);
-  document.getElementById('againBtn').onclick = ()=>{ startRun(); currentScreen='month'; render('month'); };
-  document.getElementById('switchBtn').onclick = ()=>{ currentScreen='path'; render('path'); };
-}
-
-function bindCommon(){
-  document.querySelectorAll('[data-next]').forEach(btn=>btn.onclick=()=>{currentScreen=btn.dataset.next; render(currentScreen);});
-}
-
-function render(screen){
-  currentScreen = screen;
-  if(screen==='landing') return renderLanding();
-  if(screen==='country') return renderCountry();
-  if(screen==='goal') return renderGoal();
-  if(screen==='situation') return renderSituation();
-  if(screen==='path') return renderPath();
-  if(screen==='month') return renderMonth();
-  if(screen==='summary') return renderSummary();
-}
-
-render('landing');
+// initial flow
+function init(){ goIntro(); }
+init();
