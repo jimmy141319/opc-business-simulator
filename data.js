@@ -1,49 +1,36 @@
-window.GAME_DATA = {
-  introZh: '你不是在填資料，你正在開始一局。先選你的現金目標，再選一條你走得動的路。',
-  cashTargets: [
-    { id:'30k', label:'NT$30,000', desc:'先穩住生活節奏。', goal:30000 },
-    { id:'50k', label:'NT$50,000', desc:'開始有基本安全感。', goal:50000 },
-    { id:'100k', label:'NT$100,000', desc:'進入成長與選擇期。', goal:100000 },
-    { id:'300k', label:'NT$300,000', desc:'高目標，需要更強槓桿。', goal:300000 }
-  ],
-  situations: [
-    { id:'stable', title:'一般起步', desc:'你還有一些空間，可以先看清方向。', cash:20000, confidence:58, stability:56 },
-    { id:'pressure', title:'壓力起步', desc:'你需要比較快補到現金流。', cash:10000, confidence:46, stability:38 },
-    { id:'debt', title:'零現金 / 高負債', desc:'先活下來，再慢慢重建。', cash:3000, confidence:36, stability:24 }
-  ],
-  paths: [
-    { id:'solo', title:'一人公司', icon:'🧠', tag:'低成本上手', desc:'用技能、服務、AI 與低成本模式建立收入。' },
-    { id:'smallbiz', title:'小生意', icon:'🛍️', tag:'直接做生意', desc:'用商品、擺攤、販售或在地經營去換現金流。' },
-    { id:'asset', title:'資產型', icon:'🏠', tag:'偏資產路線', desc:'從租賃、房產、設備或收租思維開始布局。' },
-    { id:'mixed', title:'混合型', icon:'🧩', tag:'分散風險', desc:'把勞動、小生意與資產思維混搭，降低風險。' }
-  ],
+window.GAME = {
+  goal: 50000,
+  startCash: 20000,
   months: [
     {
-      title:'第 1 月：先活下來，還是先衝一波？',
-      advisor:'先別急著找完美答案，先選一個你這個月走得動的做法。',
-      choices:[
-        { title:'先守住現金', text:'保住手上資源，少犯錯。', effect:{cash:+12000, stability:+10, confidence:+6, clarity:+8}, result:'你先保住了現金與節奏，雖然還沒爆發，但壓力沒有繼續惡化。', lesson:'你學到：穩住現金流，常常比表面成長更重要。' },
-        { title:'試一次主動出擊', text:'多曝光、多接觸，換更大可能。', effect:{cash:+18000, stability:-2, confidence:+10, clarity:+5}, result:'你拿到了一些新機會，但節奏也開始變得比較緊。', lesson:'你學到：成長可以更快，但不一定更穩。' },
-        { title:'借時間換空間', text:'先借一點，補眼前缺口。', effect:{cash:+24000, stability:-8, confidence:+4, clarity:+7}, result:'你暫時補上了現金缺口，但後面的壓力也開始跟上來。', lesson:'你學到：借款能救急，但不是免費的時間。' }
+      title: '第 1 月｜先補現金，還是先升級？',
+      situation: '你每月目標 5 萬，現在只有 2 萬現金流。這個月你接到一個低價但快速進帳的小案子。你知道一直做低價案，很難真的接近目標。',
+      npc: '先不要急著找最厲害的答案。先找一條你現在走得動，而且走得穩的路。',
+      choices: [
+        {title:'接下低價案，先補現金', desc:'本月現金增加較快，但你會更忙，下個月仍可能卡在低價工作。', tag:'短期補血', result:{cash:12000, pressure:10, stability:-5, lesson:'低價忙碌，不一定能把你帶到更高的現金流。', note:'你先補到了現金，這不是壞事。但如果一直只靠低價案，你會很忙，卻很難真的靠近 5 萬目標。'}},
+        {title:'整理高價服務內容', desc:'本月現金壓力較大，但有機會為下個月打基礎。', tag:'長期鋪路', result:{cash:3000, pressure:15, stability:-8, lesson:'對的方向，也要配合活得下去的節奏。', note:'你看得很遠，但這個月的現金壓力會更明顯。如果沒有緩衝，太早只追高價，可能先被現實壓垮。'}},
+        {title:'補現金，同時升級高價版本', desc:'本月能補一點現金，也能保留一些升級空間，但會比較累。', tag:'平衡做法', result:{cash:8000, pressure:6, stability:4, lesson:'先補現金，再慢慢升級，往往比只拚短期或只拚理想更穩。', note:'你沒有只顧今天，也沒有完全忽略明天。這是一個成熟的平衡。'}}
       ]
     },
     {
-      title:'第 2 月：你要更聚焦，還是更分散？',
-      advisor:'現在開始，你的每個選擇都會決定這條路是越來越穩，還是越來越忙。',
-      choices:[
-        { title:'聚焦一條主路', text:'把力氣集中到最可能的地方。', effect:{cash:+18000, stability:+12, confidence:+8, clarity:+10}, result:'你開始看出哪一條路真的能帶來現金，雜訊變少了。', lesson:'你學到：不是做越多越好，而是做更準。' },
-        { title:'什麼都試一點', text:'用更多方式碰碰運氣。', effect:{cash:+8000, stability:-4, confidence:+2, clarity:-2}, result:'你感覺很忙，但真正有效的結果沒有想像中多。', lesson:'你學到：分散嘗試可以找方向，但太散也會讓現金變慢。' },
-        { title:'用 AI 放大自己', text:'花月費換更高產能。', effect:{cash:+15000, stability:+4, confidence:+10, clarity:+8}, result:'你多了一點效率，也看到一人模式的槓桿開始出現。', lesson:'你學到：工具不是魔法，但可以讓你少走很多重複路。' }
+      title: '第 2 月｜借款撐一下，還是先縮支出？',
+      situation: '收入比上月好一點，但固定支出還是很重。你在考慮要不要先借一筆小錢，撐過眼前壓力。',
+      npc: '很多人只想補錢，卻忘了先把洞補起來。這一關看的是結構，不是表面舒服。',
+      choices: [
+        {title:'借一筆小額資金', desc:'現在壓力會小一點，但下個月開始會有利息與還款壓力。', tag:'向未來借時間', result:{cash:15000, pressure:-5, stability:-4, lesson:'借款能救急，但不能取代穩定的收入結構。', note:'你暫時解決了眼前問題，但現在的你不是沒事了，而是把一部分壓力往後移了。'}},
+        {title:'直接縮減固定支出', desc:'本月比較辛苦，但之後結構會更輕。', tag:'先補洞', result:{cash:2000, pressure:8, stability:10, lesson:'縮小固定支出，往往比假裝成長更重要。', note:'這個月不輕鬆，但你做的是結構調整。很多人只想補錢，卻忘了先把洞補起來。'}},
+        {title:'借少一點，同時小幅縮支出', desc:'本月有一點喘息空間，也不會把未來壓力拉太高。', tag:'穩定前進', result:{cash:9000, pressure:1, stability:9, lesson:'現金缺口的處理，重點不是撐一時，而是讓未來更可管理。', note:'你沒有把希望全壓在借款上，也沒有讓自己硬撐到崩。這是比較穩的做法。'}}
       ]
     },
     {
-      title:'第 3 月：現在要衝刺，還是先穩穩收？',
-      advisor:'這個月不是看你多拼，而是看你有沒有用對方式接近自己的目標。',
-      choices:[
-        { title:'提高單位價值', text:'不要只追求量，先讓每單更值錢。', effect:{cash:+22000, stability:+8, confidence:+12, clarity:+10}, result:'你的收入品質開始變好，壓力沒有跟著等比例增加。', lesson:'你學到：高目標常常不是靠更忙，而是靠更高價值。' },
-        { title:'拼命放大量', text:'衝訂單、衝曝光、衝更多。', effect:{cash:+26000, stability:-10, confidence:+6, clarity:+2}, result:'你衝出了一波數字，但身體與現金節奏都開始變緊。', lesson:'你學到：放大量能帶來成長，但如果結構不穩，壓力會一起放大。' },
-        { title:'先守住可持續', text:'保留餘裕，避免下月崩盤。', effect:{cash:+14000, stability:+14, confidence:+8, clarity:+8}, result:'雖然沒有衝很高，但你把這條路變得更能走下去。', lesson:'你學到：真正的進步，是下個月你還走得動。' }
+      title: '第 3 月｜自己更忙，還是讓工具放大？',
+      situation: '你開始發現，光靠自己做事，收入上升速度很有限。你可以自己接更多工作，或開始用 AI 工具整理流程、提速、提高產能。',
+      npc: '如果每一次成長都只能靠你更累，這條路很快會卡住。這一關看的是槓桿。',
+      choices: [
+        {title:'自己再接更多工作', desc:'本月可能多一點錢，但時間與壓力會快速上升。', tag:'硬撐上去', result:{cash:10000, pressure:15, stability:-6, lesson:'把自己塞滿，不等於建立了可持續的收入模式。', note:'你很努力，也確實多換到了一點現金。但如果每一次成長都只能靠你更累，這條路很快會卡住。'}},
+        {title:'導入 AI 工具提高效率', desc:'本月要先付月費，但未來產能可能提高。', tag:'開始做槓桿', result:{cash:6000, pressure:0, stability:8, lesson:'AI 不是魔法，但它可以幫你把時間型收入，慢慢轉成更有效率的模式。', note:'你這次不是只追眼前收入，而是在替未來多留一點空間。'}},
+        {title:'先維持現狀再觀察', desc:'壓力不會突然升高，但成長速度有限。', tag:'暫時不動', result:{cash:3000, pressure:0, stability:2, lesson:'穩住很重要，但穩住之後，還是要找能放大收入的方法。', note:'你先穩住了，這沒有錯。但如果一直不升級，你會發現自己離 5 萬還是很遠。'}}
       ]
     }
   ]
-};
+}
