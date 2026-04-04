@@ -1,97 +1,89 @@
-const app = document.getElementById('app');
-const state = { month: -1, currentCash: GAME.startCash, pressure: 40, stability: 45, learned: [] };
 
-function money(n){ return `NT$${n.toLocaleString('en-US')}`; }
+const state = {target:null,start:null,path:null,monthIndex:-1,chosenChoice:null,cashFlow:20000,pressure:45,stability:50,confidence:45};
+const screen=document.getElementById('screen'); const hud=document.getElementById('hud');
+const hudTarget=document.getElementById('hudTarget'); const hudMonth=document.getElementById('hudMonth');
+const hudCash=document.getElementById('hudCash'); const hudGap=document.getElementById('hudGap');
+const restartBtn=document.getElementById('restartBtn');
 
-function renderStart(){
-  app.innerHTML = `
-    <div class="top">
-      <div class="logo"><div class="logoBox">OPC</div><div><div class="title">OPC Business Simulator</div><div class="sub">核心玩法原型｜不是首頁，是先驗證玩法</div></div></div>
-    </div>
-    <div class="card hero">
-      <span class="badge">第 0 回合</span>
-      <div class="h1">你的現金流之路，現在開始。</div>
-      <div class="p">目標不是一夜翻盤，而是先把每月現金流從 <b>${money(GAME.startCash)}</b>，慢慢往 <b>${money(GAME.goal)}</b> 推。</div>
-      <button class="btn primary" id="startBtn">開始第一個月</button>
-    </div>
-    <div class="npc"><div class="avatar">🧭</div><div><div class="npcName">顧問 NPC</div><div class="npcText">先不要急著找最厲害的答案。先找一條你現在走得動、而且走得穩的路。</div></div></div>
-    <div class="hud">
-      <div class="pill">目標：${money(GAME.goal)}</div>
-      <div class="pill">起點：壓力起步</div>
-      <div class="pill">路線：一人公司</div>
-    </div>`;
-  document.getElementById('startBtn').onclick = () => { state.month = 0; renderMonth(); };
+restartBtn.addEventListener('click', ()=>resetRun());
+function fmt(n){ return "NT$"+Number(n).toLocaleString("en-US"); }
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+function resetRun(){ state.target=null; state.start=null; state.path=null; state.monthIndex=-1; state.chosenChoice=null; state.cashFlow=20000; state.pressure=45; state.stability=50; state.confidence=45; renderIntro(); }
+function updateHUD(){ if(state.path){hud.classList.remove('hidden'); restartBtn.hidden=false;} else {hud.classList.add('hidden'); restartBtn.hidden=true;}
+  hudTarget.textContent=fmt(state.target||50000); hudMonth.textContent=state.monthIndex>=0?`${state.monthIndex+1} / 3`:"0 / 3"; hudCash.textContent=fmt(state.cashFlow); hudGap.textContent=fmt(Math.max((state.target||50000)-state.cashFlow,0)); }
+
+function renderIntro(){ updateHUD(); screen.innerHTML=`
+<section class="hero">
+  <div class="hero-visual">
+    <div class="float-card"><div class="small">第 0 回合</div><div class="big">先定現金目標</div></div>
+    <div class="avatar"></div><div class="cityline3"></div><div class="cityline2"></div><div class="cityline"></div>
+  </div>
+  <h1 class="hero-title">你的現金流之路，從這一局開始。</h1>
+  <div class="hero-sub">這不是問卷，也不是課程。這是一局 3 個月的商業人生模擬。每個月你都會遇到一個真實情境，做一個選擇，然後立刻看見代價與收穫。</div>
+  <button class="btn-primary" id="startRunBtn">開始這一局</button>
+</section>
+<section class="dialogue"><div class="npc"></div><div><div class="name">顧問 / 貴人</div><div class="line">先不要急著變很厲害。先找一條你現在走得動，而且越走越穩的路。</div></div></section>`;
+document.getElementById('startRunBtn').onclick=renderGoal; }
+
+function renderGoal(){ updateHUD();
+screen.innerHTML=`<section class="panel"><div class="kicker">第 0 回合</div><h2 class="title">你每個月需要多少現金流？</h2><p class="subtitle">不用先證明自己。先誠實地說出你想補到多少，我們再往下走。</p><div class="option-grid">${
+GAME_DATA.cashTargets.map(t=>`<button class="btn-pick pick-card" data-target="${t.value}"><div class="pick-top"><div class="pick-icon">💰</div><div class="pick-badge">每月目標</div></div><div class="pick-title">${t.label}</div><p class="pick-desc">先說出你每個月真正需要的現金流。我們再幫你看，哪條路比較有機會接近它。</p><div class="pick-note">先定目標，不先評價高低。</div></button>`).join('')
+}</div></section>`;
+document.querySelectorAll('[data-target]').forEach(el=>el.onclick=()=>{state.target=Number(el.dataset.target); renderStartType();}); }
+
+function renderStartType(){ updateHUD();
+screen.innerHTML=`<section class="panel"><div class="kicker">第 0 回合</div><h2 class="title">你現在站在哪種起點？</h2><p class="subtitle">這不是貼標籤，只是讓這一局更貼近現實。</p><div class="option-grid">${
+GAME_DATA.starts.map(s=>`<button class="btn-pick pick-card" data-start="${s.id}"><div class="pick-top"><div class="pick-icon">${s.icon}</div><div class="pick-badge">${s.badge}</div></div><div class="pick-title">${s.title}</div><p class="pick-desc">${s.desc}</p><div class="pick-note">選最接近你現在的狀態，不需要完美。</div></button>`).join('')
+}</div></section>`;
+document.querySelectorAll('[data-start]').forEach(el=>el.onclick=()=>{state.start=el.dataset.start; if(state.start==='stable'){state.cashFlow=26000; state.pressure=28; state.stability=58; state.confidence=54;} if(state.start==='pressure'){state.cashFlow=20000; state.pressure=45; state.stability=50; state.confidence=45;} if(state.start==='zero'){state.cashFlow=12000; state.pressure=68; state.stability=38; state.confidence=36;} renderPath();}); }
+
+function renderPath(){ updateHUD();
+screen.innerHTML=`<section class="panel"><div class="kicker">第 0 回合</div><h2 class="title">先選你這一局的第一條路</h2><p class="subtitle">這不是永遠的身份，只是你先測的第一條可行收入路。</p><div class="option-grid">${
+GAME_DATA.paths.map(p=>`<button class="btn-pick pick-card" data-path="${p.id}"><div class="pick-top"><div class="pick-icon">${p.icon}</div><div class="pick-badge">${p.badge}</div></div><div class="pick-title">${p.title}</div><p class="pick-desc">${p.desc}</p><div class="pick-note">${p.note}</div></button>`).join('')
+}</div></section><section class="dialogue"><div class="npc"></div><div><div class="name">顧問 / 貴人</div><div class="line">先選一條你現在走得動的路，不要急著選看起來最厲害的。</div></div></section>`;
+document.querySelectorAll('[data-path]').forEach(el=>el.onclick=()=>{state.path=el.dataset.path; state.monthIndex=0; renderMonth();}); }
+
+function renderMonth(){ updateHUD(); const route=GAME_DATA.routes[state.path]; const month=route.months[state.monthIndex];
+screen.innerHTML=`<section class="result-hero"><div class="kicker">${state.path==='solo'?'一人公司路':'小生意路'}</div><h2 class="result-title">${month.title}</h2><div class="small-muted">${month.situation}</div></section>
+<section class="dialogue"><div class="npc"></div><div><div class="name">顧問 / 貴人</div><div class="line">${month.mentor}</div></div></section>
+<section class="panel"><div class="stat-row">
+<div class="stat-box"><div class="stat-label">目標現金流</div><div class="stat-value">${fmt(state.target)}</div></div>
+<div class="stat-box"><div class="stat-label">目前現金流</div><div class="stat-value">${fmt(state.cashFlow)}</div></div>
+<div class="stat-box"><div class="stat-label">壓力值</div><div class="stat-value">${state.pressure}</div></div>
+<div class="stat-box"><div class="stat-label">穩定度</div><div class="stat-value">${state.stability}</div></div>
+</div></section>
+<section class="choice-list">${
+month.choices.map((c,idx)=>`<button class="choice-card" data-choice="${idx}"><div class="choice-head"><div class="choice-title">${c.title}</div><div class="choice-tag">${c.tag}</div></div><div class="choice-copy">${c.copy}</div><div class="meter-list">${c.meters.map(m=>`<span class="meter">${m}</span>`).join('')}</div></button>`).join('')
+}</section>`;
+document.querySelectorAll('[data-choice]').forEach(el=>el.onclick=()=>{state.chosenChoice=Number(el.dataset.choice); renderResult();}); }
+
+function renderResult(){ const route=GAME_DATA.routes[state.path]; const month=route.months[state.monthIndex]; const choice=month.choices[state.chosenChoice];
+state.cashFlow += choice.delta.cash; state.pressure=clamp(state.pressure+choice.delta.pressure,0,100); state.stability=clamp(state.stability+choice.delta.stability,0,100); state.confidence=clamp(state.confidence+choice.delta.confidence,0,100);
+updateHUD();
+screen.innerHTML=`<section class="result-hero"><div class="kicker">結果揭曉</div><h2 class="result-title">${choice.resultTitle}</h2><div class="small-muted">${choice.resultText}</div></section>
+<section class="panel"><div class="stat-row">
+<div class="stat-box"><div class="stat-label">本月現金流</div><div class="stat-value">${fmt(state.cashFlow)}</div></div>
+<div class="stat-box"><div class="stat-label">壓力值</div><div class="stat-value">${state.pressure}</div></div>
+<div class="stat-box"><div class="stat-label">穩定度</div><div class="stat-value">${state.stability}</div></div>
+<div class="stat-box"><div class="stat-label">信心值</div><div class="stat-value">${state.confidence}</div></div>
+</div></section>
+<section class="lesson"><strong>你這次學到什麼：</strong><br>${choice.lesson}</section>
+<section class="dialogue"><div class="npc"></div><div><div class="name">顧問 / 貴人</div><div class="line">你不是在被考試。你是在慢慢看懂：什麼選擇會把你帶近目標，什麼選擇只是看起來很忙。</div></div></section>
+<div class="center"><button class="btn-next" id="nextBtn">${state.monthIndex===2?'看總結':'進入下個月'}</button></div>`;
+document.getElementById('nextBtn').onclick=()=>{ if(state.monthIndex===2){ renderSummary(); } else { state.monthIndex += 1; renderMonth(); } };
 }
 
-function renderMonth(){
-  const m = GAME.months[state.month];
-  app.innerHTML = `
-    <div class="top">
-      <div class="logo"><div class="logoBox">OPC</div><div><div class="title">OPC Business Simulator</div><div class="sub">像遊戲一樣學現金流</div></div></div>
-      <div class="pill">${state.month+1} / ${GAME.months.length}</div>
-    </div>
-    <div class="hud">
-      <div class="pill">目標：${money(GAME.goal)}</div>
-      <div class="pill">目前：${money(state.currentCash)}</div>
-      <div class="pill">差距：${money(Math.max(0,GAME.goal-state.currentCash))}</div>
-    </div>
-    <div class="sectionTitle">${m.title}</div>
-    <div class="sectionSub">${m.situation}</div>
-    <div class="npc"><div class="avatar">🧠</div><div><div class="npcName">顧問 NPC</div><div class="npcText">${m.npc}</div></div></div>
-    ${m.choices.map((c,i)=>`
-      <div class="option" data-i="${i}">
-        <h3>${c.title}</h3>
-        <p>${c.desc}</p>
-        <div class="tag">${c.tag}</div>
-      </div>`).join('')}
-  `;
-  document.querySelectorAll('.option').forEach(el=>el.onclick = ()=>choose(Number(el.dataset.i)));
+function renderSummary(){ updateHUD(); const route=GAME_DATA.routes[state.path]; const gap=Math.max(state.target-state.cashFlow,0);
+screen.innerHTML=`<section class="result-hero"><div class="kicker">3 個月總結</div><h2 class="result-title">${route.summary.headline}</h2><div class="small-muted">你現在不一定已經達標，但你已經比剛開始更懂，自己該怎麼走。</div></section>
+<section class="summary-grid">
+<div class="summary-card"><div class="summary-title">你的目標</div><div class="summary-big">${fmt(state.target)}</div></div>
+<div class="summary-card"><div class="summary-title">目前現金流</div><div class="summary-big">${fmt(state.cashFlow)}</div></div>
+<div class="summary-card"><div class="summary-title">還差多少</div><div class="summary-big">${fmt(gap)}</div></div>
+<div class="summary-card"><div class="summary-title">這一局你的狀態</div><div class="summary-big">壓力 ${state.pressure} / 穩定 ${state.stability} / 信心 ${state.confidence}</div></div>
+</section>
+<section class="panel"><div class="kicker">你學到的 3 件事</div><div class="choice-list">${route.summary.bullets.map(b=>`<div class="summary-card">${b}</div>`).join('')}</div></section>
+<section class="dialogue"><div class="npc"></div><div><div class="name">顧問 / 貴人</div><div class="line">${route.summary.next}</div></div></section>
+<div class="center"><button class="btn-primary" id="playAgainBtn">再玩一局</button></div>`;
+document.getElementById('playAgainBtn').onclick=()=>{ state.monthIndex=-1; state.path=null; renderPath(); };
 }
-
-function choose(i){
-  const m = GAME.months[state.month];
-  const c = m.choices[i];
-  state.currentCash += c.result.cash;
-  state.pressure += c.result.pressure;
-  state.stability += c.result.stability;
-  state.learned.push(c.result.lesson);
-  app.innerHTML = `
-    <div class="top">
-      <div class="logo"><div class="logoBox">OPC</div><div><div class="title">結果揭曉</div><div class="sub">第 ${state.month+1} 個月</div></div></div>
-    </div>
-    <div class="stats">
-      <div class="stat"><label>本月現金流變化</label><strong>+ ${money(c.result.cash)}</strong></div>
-      <div class="stat"><label>目前現金流</label><strong>${money(state.currentCash)}</strong></div>
-      <div class="stat"><label>壓力值</label><strong>${state.pressure}</strong></div>
-      <div class="stat"><label>穩定度</label><strong>${state.stability}</strong></div>
-    </div>
-    <div class="npc"><div class="avatar">💬</div><div><div class="npcName">顧問 NPC</div><div class="npcText">${c.result.note}</div></div></div>
-    <div class="lesson"><h4>你這次學到什麼</h4><p>${c.result.lesson}</p></div>
-    <button class="btn primary" id="nextBtn">${state.month < GAME.months.length-1 ? '進入下一個月' : '查看 3 個月總結'}</button>
-  `;
-  document.getElementById('nextBtn').onclick = ()=>{
-    if(state.month < GAME.months.length-1){ state.month += 1; renderMonth(); } else { renderEnd(); }
-  }
-}
-
-function renderEnd(){
-  app.innerHTML = `
-    <div class="top">
-      <div class="logo"><div class="logoBox">OPC</div><div><div class="title">3 個月總結</div><div class="sub">先看玩法有沒有用</div></div></div>
-    </div>
-    <div class="card">
-      <div class="sectionTitle">你現在比開始時更懂了。</div>
-      <div class="sectionSub">這 3 個月，你不是只在選答案，而是在看懂：哪些錢來得快但代價高，哪些選擇看起來慢卻更穩。</div>
-      <div class="stats">
-        <div class="stat"><label>目標</label><strong>${money(GAME.goal)}</strong></div>
-        <div class="stat"><label>目前</label><strong>${money(state.currentCash)}</strong></div>
-      </div>
-    </div>
-    <div class="lesson" style="margin-top:16px"><h4>這 3 個月你學到的 3 件事</h4><p class="small">1. ${state.learned[0] || ''}<br><br>2. ${state.learned[1] || ''}<br><br>3. ${state.learned[2] || ''}</p></div>
-    <div class="npc"><div class="avatar">✨</div><div><div class="npcName">顧問 NPC</div><div class="npcText">你現在還沒到目標，這很正常。但你已經不再只是焦慮，而是開始知道差距從哪裡來，下一步該怎麼走。</div></div></div>
-    <button class="btn secondary" id="restartBtn">再玩一次</button>
-  `;
-  document.getElementById('restartBtn').onclick = ()=>{ state.month=-1; state.currentCash=GAME.startCash; state.pressure=40; state.stability=45; state.learned=[]; renderStart(); };
-}
-
-renderStart();
+renderIntro();

@@ -1,13 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>OPC Business Simulator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app" class="app">
+    <div class="top-status">
+      <div class="brand-mini">OPC BUSINESS SIMULATOR</div>
+      <button id="restartBtn" class="ghost-btn" hidden>重開這一局</button>
+    </div>
+    <main id="screen" class="screen"></main>
+    <div id="hud" class="hud hidden">
+      <div class="hud-item"><div class="hud-label">目標</div><div id="hudTarget" class="hud-value">NT$50,000</div></div>
+      <div class="hud-item"><div class="hud-label">月數</div><div id="hudMonth" class="hud-value">0 / 3</div></div>
+      <div class="hud-item"><div class="hud-label">現金流</div><div id="hudCash" class="hud-value">NT$20,000</div></div>
+      <div class="hud-item"><div class="hud-label">差距</div><div id="hudGap" class="hud-value">NT$30,000</div></div>
+    </div>
+  </div>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
