@@ -3,297 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Survival: The First Stream</title>
+    <title>Survival: 1st Income</title>
     <style>
         :root {
             --primary: #00f2ff;
-            --danger: #ff3e3e;
+            --danger: #ff4d4d;
             --success: #00ff88;
-            --bg: #0d0d0f;
-            --panel: rgba(25, 25, 30, 0.95);
-            --text: #e0e0e0;
-            --accent: #ffd700;
+            --warning: #ffcc00;
+            --bg-dark: #0a0a0c;
+            --panel-bg: rgba(20, 20, 25, 0.95);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: var(--bg); color: var(--text);
+            background: var(--bg-dark); color: #fff;
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             overflow: hidden;
         }
 
         /* --- HUD Layer --- */
         .hud {
-            position: fixed; top: 0; left: 0; width: 100%; height: 90px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 80px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            padding: 15px 5px; z-index: 100; border-bottom: 1px solid rgba(0,242,255,0.1);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 10px 0; z-index: 100; border-bottom: 1px solid rgba(0,242,255,0.1);
         }
-        .stat { text-align: center; }
-        .stat-label { font-size: 10px; color: #888; margin-bottom: 4px; letter-spacing: 1px; }
-        .stat-value { font-size: 15px; font-weight: 900; color: var(--primary); }
-        .stat-value.stress { color: var(--danger); }
-        .stat-value.month { color: var(--accent); }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-value { font-size: 16px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+        .stat-value.danger { color: var(--danger); }
 
         /* --- Main Scene --- */
-        .main-scene {
+        .scene {
             position: absolute; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1a1a20 0%, #0d0d0f 100%);
-            display: flex; justify-content: center; align-items: center;
-        }
-        
-        .environment {
-            position: relative; width: 300px; height: 400px;
-            background: rgba(255,255,255,0.03); border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: radial-gradient(circle at 50% 40%, #1a1a2e 0%, #050505 100%);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .character-sprite {
-            width: 120px; height: 180px;
-            background: linear-gradient(180deg, #333, #111);
-            border-radius: 60px 60px 10px 10px;
-            position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
-        .character-sprite::after {
-            content: "失業者 (第7天)"; position: absolute; bottom: -30px; left: 50%;
-            transform: translateX(-50%); font-size: 12px; color: #666; white-space: nowrap;
+        .room-visual {
+            position: relative; width: 280px; height: 350px;
+            border-bottom: 4px solid #333;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
         }
 
-        .desk-overlay {
-            position: absolute; bottom: 40px; width: 220px; height: 10px;
-            background: #222; border-radius: 5px; box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+        .character {
+            width: 80px; height: 160px;
+            background: linear-gradient(to bottom, #444, #222);
+            border-radius: 40px 40px 5px 5px;
+            position: relative; margin-bottom: 10px;
+            box-shadow: 0 0 30px rgba(0,242,255,0.1);
+        }
+        .character::after {
+            content: ''; position: absolute; top: 20px; left: 15px; right: 15px; height: 10px;
+            background: rgba(0,242,255,0.3); border-radius: 5px; /* Eyes/Visor */
         }
 
-        /* --- UI Overlay (Notifications/Dialogues) --- */
+        .desk {
+            width: 200px; height: 60px; background: #1a1a1a;
+            border-top: 2px solid #444; border-radius: 4px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* --- UI Overlay --- */
         .ui-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 200;
+            position: absolute; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50;
         }
 
-        .phone-notification {
-            position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 340px; background: var(--panel);
-            border-left: 4px solid var(--primary); border-radius: 8px;
-            padding: 15px; pointer-events: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: notifyPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes notifyPop { from { opacity:0; transform: translateX(-50%) translateY(-20px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
-
-        .npc-dialogue {
-            position: absolute; bottom: 230px; left: 50%; transform: translateX(-50%);
-            width: 90%; background: rgba(0,0,0,0.85); border: 1px solid #333;
-            border-radius: 12px; padding: 18px; pointer-events: auto;
-        }
-        .npc-name { color: var(--primary); font-size: 13px; font-weight: bold; margin-bottom: 5px; }
-        .npc-text { font-size: 15px; line-height: 1.5; color: #fff; }
-
-        /* --- Action Layer --- */
-        .action-layer {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 210px;
-            background: linear-gradient(to top, #000, transparent);
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; gap: 12px; padding: 20px; z-index: 300;
+        .notif-popup {
+            position: absolute; top: 100px; left: 5%; width: 90%;
+            background: var(--panel-bg); border-left: 4px solid var(--primary);
+            border-radius: 8px; padding: 15px; pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            animation: slideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
 
-        .btn-action {
+        .dialogue-box {
+            position: absolute; bottom: 220px; left: 5%; width: 90%;
+            background: rgba(0,0,0,0.8); border: 1px solid #333;
+            border-radius: 12px; padding: 15px; pointer-events: auto;
+        }
+        .npc-name { color: var(--primary); font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+        .message { font-size: 15px; line-height: 1.5; color: #eee; }
+
+        /* --- Actions --- */
+        .action-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 200px;
+            background: linear-gradient(to top, #000 70%, transparent);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 12px; padding: 20px; z-index: 150;
+        }
+
+        .btn {
             width: 100%; max-width: 340px; height: 55px;
-            background: linear-gradient(180deg, #1e1e24 0%, #111115 100%);
-            border: 1px solid var(--primary); border-radius: 12px;
-            color: var(--primary); font-size: 17px; font-weight: bold;
+            background: linear-gradient(180deg, #222, #111);
+            border: 1px solid var(--primary); border-radius: 10px;
+            color: var(--primary); font-size: 18px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,242,255,0.15);
-            transition: 0.1s; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,242,255,0.1);
+            cursor: pointer; transition: 0.1s;
         }
-        .btn-action:active { transform: scale(0.97); filter: brightness(1.2); }
+        .btn:active { transform: scale(0.96); background: var(--primary); color: #000; }
 
-        /* --- Battle Report --- */
-        .report-overlay {
+        /* --- Report Modal --- */
+        .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 400;
+            background: rgba(0,0,0,0.95); z-index: 500;
             display: none; flex-direction: column; align-items: center; justify-content: center;
             padding: 30px;
         }
         .report-card {
-            width: 100%; max-width: 320px; background: #1a1a1e;
-            border: 1px solid var(--accent); border-radius: 15px; padding: 25px;
-            text-align: center;
+            width: 100%; max-width: 320px; background: #15151a; border: 1px solid var(--warning);
+            border-radius: 16px; padding: 25px; text-align: center;
         }
-        .report-title { color: var(--accent); font-size: 24px; margin-bottom: 20px; }
-        .report-row { display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .report-val { color: var(--success); font-weight: bold; }
-        .lesson-box { margin-top: 20px; background: #000; padding: 12px; border-radius: 8px; color: var(--primary); font-size: 14px; line-height: 1.4; }
+        .report-title { color: var(--warning); font-size: 22px; margin-bottom: 20px; }
+        .stat-diff { font-size: 28px; font-weight: 900; margin: 10px 0; color: var(--success); }
+        .lesson { background: #000; padding: 15px; border-radius: 8px; font-size: 14px; color: #aaa; line-height: 1.4; margin-top: 15px; }
 
-        .hidden { display: none !important; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="hud">
-        <div class="stat">
+        <div class="stat-box">
             <div class="stat-label">目標流</div>
-            <div id="hud-target" class="stat-value">50,000</div>
+            <div id="target-flow" class="stat-value">50,000</div>
         </div>
-        <div class="stat">
+        <div class="stat-box">
             <div class="stat-label">目前流</div>
-            <div id="hud-current" class="stat-value">0</div>
+            <div id="current-flow" class="stat-value">0</div>
         </div>
-        <div class="stat">
+        <div class="stat-box">
             <div class="stat-label">壓力</div>
-            <div id="hud-stress" class="stat-value stress">30%</div>
+            <div id="stress" class="stat-value">20%</div>
         </div>
-        <div class="stat">
-            <div class="stat-label">章節</div>
-            <div id="hud-month" class="stat-value month">M1</div>
+        <div class="stat-box">
+            <div class="stat-label">月份</div>
+            <div id="month" class="stat-value">M1</div>
         </div>
     </div>
 
-    <div class="main-scene">
-        <div class="environment">
-            <div class="character-sprite"></div>
-            <div class="desk-overlay"></div>
+    <div class="scene">
+        <div class="room-visual">
+            <div class="character"></div>
+            <div class="desk">
+                <div style="width:40px; height:3px; background:#00f2ff; box-shadow:0 0 10px #00f2ff;"></div>
+            </div>
         </div>
 
         <div class="ui-overlay">
-            <div id="phone-notif" class="phone-notification">
-                <div style="font-size: 10px; color: #888; margin-bottom: 5px;">💬 LINE 通知</div>
-                <div style="font-weight: bold; font-size: 14px;">前主管：嘿，聽說你離職了？</div>
+            <div id="notif" class="notif-popup">
+                <div style="font-size: 11px; color: var(--primary); margin-bottom: 4px;">SYSTEM MESSAGE</div>
+                <div id="notif-text" style="font-weight: bold;">帳戶餘額不足，請在 3 個月內達成現金流目標。</div>
             </div>
-
-            <div id="dialogue-box" class="npc-dialogue">
-                <div class="npc-name">自我對話</div>
-                <div id="dialogue-text" class="npc-text">銀行帳戶只剩一點錢了...我得在三個月內把現金流拉到 5 萬，否則就得回老家。</div>
+            <div class="dialogue-box">
+                <div id="npc-name" class="npc-name">主角 (失業者)</div>
+                <div id="message" class="message">離職第 7 天，該開始找第一筆收入了...</div>
             </div>
         </div>
     </div>
 
-    <div class="action-layer">
-        <div id="btn-1" class="btn-action" onclick="game.playAction(0)">動作 A</div>
-        <div id="btn-2" class="btn-action" onclick="game.playAction(1)">動作 B</div>
+    <div class="action-bar">
+        <div id="btn-1" class="btn" onclick="game.action(0)">動作 A</div>
+        <div id="btn-2" class="btn" onclick="game.action(1)">動作 B</div>
     </div>
 
-    <div id="report" class="report-overlay">
+    <div id="report-modal" class="modal">
         <div class="report-card">
             <div class="report-title">月度戰報</div>
-            <div id="report-details"></div>
-            <div id="report-lesson" class="lesson-box"></div>
-            <button class="btn-action" style="margin-top:20px; border-color:var(--accent); color:var(--accent);" onclick="game.nextMonth()">進入下個月</button>
+            <div id="report-diff" class="stat-diff">+$0</div>
+            <div id="report-text" style="font-size: 14px; margin-bottom: 10px;"></div>
+            <div id="report-lesson" class="lesson"></div>
+            <button class="btn" style="margin-top:25px; border-color:var(--warning); color:var(--warning);" onclick="game.next()">繼續前進</button>
         </div>
     </div>
 
     <script>
         const game = {
-            data: {
-                currentMonth: 1,
+            state: {
+                month: 1,
                 cashflow: 0,
                 target: 50000,
-                stress: 30,
-                events: [
-                    {
-                        notif: "💬 市場機會：急件外包",
-                        npc: "遠端發案商",
-                        msg: "「現在有一個 AI 圖片生成的急案，兩天內要出 50 張圖，接嗎？」",
-                        actions: [
-                            { text: "啟動 AI 模組接案", flow: 12000, stress: 15, log: "利用 AI 工具快速產出，雖然手忙腳亂但賺到了第一筆血汗錢。", lesson: "在初期，『速度』比『完美』更能換取現金流。" },
-                            { text: "先觀察市場需求", flow: 0, stress: -10, log: "你拒絕了急案，花時間研究發現企業更缺的是『AI 流程導入』而非單純圖片。", lesson: "盲目接低價案會耗盡體力，洞察需求是為了下個月的報價翻倍。" }
-                        ]
-                    },
-                    {
-                        notif: "💬 舊客戶：回頭草？",
-                        npc: "前合作夥伴",
-                        msg: "「你的技術不錯，要不要簽個長期維護合約？每個月固定付你一筆。」",
-                        actions: [
-                            { text: "升級報價包 (訂閱制)", flow: 25000, stress: 10, log: "成功轉化為訂閱制，你現在每個月不用找案子也有保底收入。", lesson: "主動收入（勞力）轉為半被動收入（維護）是脫離窮忙的關鍵。" },
-                            { text: "開始試賣 (高階諮詢)", flow: 18000, stress: 25, log: "你拒絕了維護，轉而測試 1 對 1 諮詢。雖然壓力大但單價極高。", lesson: "當你有了利基點，你的『時間』定價權就回到了自己手上。" }
-                        ]
-                    },
-                    {
-                        notif: "⚠️ 轉折點：規模化挑戰",
-                        npc: "創業顧問",
-                        msg: "「你現在案子多到接不完，是要維持現狀，還是要把這套流程外包出去？」",
-                        actions: [
-                            { text: "切換打法 (外包分潤)", flow: 40000, stress: 30, log: "你找了兩個兼差幫手，自己轉當專案經理。收入暴衝，但管理壓力讓你想哭。", lesson: "真正的收入爆炸來自於『槓桿他人時間』，而非只是自己努力。" },
-                            { text: "壓低支出 (單兵精緻化)", flow: 10000, stress: -15, log: "你退出了所有群組，只接最頂級的案子。生活變得很輕鬆，收入穩定增長。", lesson: "並非每個人都適合擴張，『高利潤、低壓力』也是一種成功路徑。" }
-                        ]
-                    }
-                ]
+                stress: 20
             },
+            content: [
+                {
+                    notif: "📩 LINE: 前同事小明",
+                    npc: "小明",
+                    msg: "「嘿，我這有個急件 Logo 要做，兩天後要。但預算只有五千，你接嗎？」",
+                    actions: [
+                        { text: "接單", flow: 5000, stress: 15, log: "雖然價格低，但你快速完成了，建立了第一個現金流點。", learn: "萬事開頭難，先有『成交』感，比追求高利潤更重要。" },
+                        { text: "啟動 AI 模組自研", flow: 0, stress: 5, log: "你拒絕了低價案，花時間調教 AI 繪圖模型，準備做高階服務。", learn: "有時候『拒絕』是為了保留體力去磨練更高價值的槓桿。" }
+                    ]
+                },
+                {
+                    notif: "📢 社群通知：外包商徵才",
+                    npc: "獵頭經理",
+                    msg: "「我們需要長期維護網站的人，每個月固定支付。但要隨時待命。」",
+                    actions: [
+                        { text: "簽署維護約", flow: 20000, stress: 30, log: "你獲得了穩定的保底收入，但私人時間被大幅壓縮。", learn: "穩定的現金流是生存基石，但要注意『時間成本』的陷阱。" },
+                        { text: "壓低支出 (搬家/節流)", flow: 8000, stress: -10, log: "你退租了昂貴工作室，雖然收入沒增，但生存壓力驟降。", learn: "收入減去支出才是真正的現金流。壓低固定成本等同於變相加薪。" }
+                    ]
+                },
+                {
+                    notif: "💎 關鍵機會：大客戶諮詢",
+                    npc: "某企業主",
+                    msg: "「你的作品集很特別，我們想請你做整年度的品牌顧問，報價吧。」",
+                    actions: [
+                        { text: "切換打法 (高階訂製)", flow: 35000, stress: 20, log: "你成功說服客戶，拿下年度約。你的專業終於獲得溢價。", learn: "當你有了前面的案例積累，『品牌信任度』就是最強大的加價器。" },
+                        { text: "維持現狀 (多點接單)", flow: 15000, stress: 40, log: "你不敢接大約，繼續拼命接小案。體力快到極限了。", learn: "不敢跨出舒適圈去承接大責任，會讓你永遠停留在體力勞動階段。" }
+                    ]
+                }
+            ],
 
             init() {
                 this.updateUI();
-                this.loadEvent();
+                this.loadChapter();
             },
 
-            loadEvent() {
-                const ev = this.data.events[this.data.currentMonth - 1];
-                document.getElementById('phone-notif').innerHTML = `
-                    <div style="font-size: 10px; color: #888; margin-bottom: 5px;">🔔 通知</div>
-                    <div style="font-weight: bold; font-size: 14px;">${ev.notif}</div>
-                `;
-                document.querySelector('.npc-name').innerText = ev.npc;
-                document.getElementById('dialogue-text').innerText = ev.msg;
-                document.getElementById('btn-1').innerText = ev.actions[0].text;
-                document.getElementById('btn-2').innerText = ev.actions[1].text;
+            loadChapter() {
+                const data = this.content[this.state.month - 1];
+                document.getElementById('notif-text').innerText = data.notif;
+                document.getElementById('npc-name').innerText = data.npc;
+                document.getElementById('message').innerText = data.msg;
+                document.getElementById('btn-1').innerText = data.actions[0].text;
+                document.getElementById('btn-2').innerText = data.actions[1].text;
             },
 
-            playAction(index) {
-                const ev = this.data.events[this.data.currentMonth - 1];
-                const act = ev.actions[index];
+            action(idx) {
+                const act = this.content[this.state.month - 1].actions[idx];
+                this.state.cashflow += act.flow;
+                this.state.stress += act.stress;
                 
-                this.data.cashflow += act.flow;
-                this.data.stress += act.stress;
-                if(this.data.stress < 0) this.data.stress = 0;
-
-                // Show Report
-                const report = document.getElementById('report');
-                document.getElementById('report-details').innerHTML = `
-                    <div class="report-row"><span>本月現金流增幅</span><span class="report-val">+$${act.flow}</span></div>
-                    <div class="report-row"><span>目前總現金流</span><span class="report-val">$${this.data.cashflow}</span></div>
-                    <div class="report-row"><span>生存壓力值</span><span class="report-val" style="color:var(--danger)">${this.data.stress}%</span></div>
-                    <p style="text-align:left; font-size:13px; margin-top:15px; color:#aaa;">${act.log}</p>
-                `;
-                document.getElementById('report-lesson').innerText = `💡 實戰心得：${act.lesson}`;
-                report.style.display = 'flex';
+                document.getElementById('report-diff').innerText = `+$${act.flow.toLocaleString()}`;
+                document.getElementById('report-text').innerText = act.log;
+                document.getElementById('report-lesson').innerText = `💡 實戰心得：${act.learn}`;
+                document.getElementById('report-modal').style.display = 'flex';
                 this.updateUI();
             },
 
-            nextMonth() {
-                document.getElementById('report').style.display = 'none';
-                if(this.data.currentMonth < 3) {
-                    this.data.currentMonth++;
-                    this.loadEvent();
+            next() {
+                document.getElementById('report-modal').style.display = 'none';
+                if (this.state.month < 3) {
+                    this.state.month++;
+                    this.loadChapter();
                     this.updateUI();
                 } else {
-                    this.endGame();
+                    this.end();
                 }
             },
 
             updateUI() {
-                document.getElementById('hud-current').innerText = this.data.cashflow.toLocaleString();
-                document.getElementById('hud-stress').innerText = this.data.stress + '%';
-                document.getElementById('hud-month').innerText = 'M' + this.data.currentMonth;
-                
-                if(this.data.stress >= 80) document.getElementById('hud-stress').style.color = 'var(--danger)';
+                document.getElementById('current-flow').innerText = this.state.cashflow.toLocaleString();
+                document.getElementById('stress').innerText = this.state.stress + '%';
+                document.getElementById('month').innerText = 'M' + this.state.month;
+                if (this.state.stress > 70) document.getElementById('stress').classList.add('danger');
             },
 
-            endGame() {
-                const win = this.data.cashflow >= this.data.target;
+            end() {
+                const win = this.state.cashflow >= this.state.target;
                 document.body.innerHTML = `
-                    <div style="height:100%; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;">
-                        <h1 style="color:var(--accent); font-size:40px;">${win ? '生存成功' : '生存挑戰失敗'}</h1>
-                        <div style="font-size:24px; margin:20px 0;">最終月現金流: $${this.data.cashflow.toLocaleString()}</div>
-                        <p style="color:#888; line-height:1.6;">
-                            ${win ? '你成功在三個月內突破了目標現金流，建立了一條可持續發展的路徑。你已經從失業者轉變為真正的「一人公司」經營者。' : '雖然現金流未達標，但你已經初步理解了市場規則。生存是一場持久戰，下次試著在壓力與收益間尋求更好的平衡。'}
-                        </p>
-                        <button class="btn-action" style="margin-top:30px;" onclick="location.reload()">重新開局</button>
+                    <div class="scene" style="text-align:center; padding:20px;">
+                        <h1 style="color:${win ? 'var(--success)' : 'var(--danger)'}">${win ? '生存達成' : '生存挑戰失敗'}</h1>
+                        <div class="stat-value" style="font-size:40px; margin:20px 0;">$${this.state.cashflow.toLocaleString()}</div>
+                        <p style="color:#888; line-height:1.6;">${win ? '你成功在 3 個月內建立起穩定的現金流，脫離了失業焦慮，邁向一人公司之路。' : '現金流不足以支撐生活，生存壓力爆表。或許該重新審視你的商業策略？'}</p>
+                        <button class="btn" style="margin-top:40px;" onclick="location.reload()">重新開局</button>
                     </div>
                 `;
             }
         };
 
-        // Start Game
         window.onload = () => game.init();
     </script>
 </body>
