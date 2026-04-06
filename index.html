@@ -3,566 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PROJECT: RESCUE PROTOCOL</title>
+    <title>SOLO VENTURE: THE CEO PROTOCOL</title>
     <style>
         :root {
-            --color-bg: #050507;
-            --color-text-primary: #e0e0e0;
-            --color-text-secondary: #aaaaaa;
-            --color-accent: #ffae00; /* Amber Alert */
-            --color-danger: #ff4444;
-            --color-success: #00ff88;
-            --color-ui-bg: rgba(10, 12, 15, 0.85);
-            --color-ui-border: rgba(255, 174, 0, 0.3);
-            --font-main: 'Arial', sans-serif; /* Simplified for self-contained */
-            --font-display: 'Oswald', sans-serif; /* Placeholder name for stylistic intent */
-            --glow: 0 0 15px rgba(255, 174, 0, 0.5);
+            --gold: #c5a059;
+            --gold-glow: rgba(197, 160, 89, 0.4);
+            --deep-blue: #0a0e14;
+            --ui-panel: rgba(16, 20, 28, 0.9);
+            --text-main: #e0e4eb;
+            --text-dim: #8a929e;
+            --danger: #ff4d4d;
+            --success: #00ffaa;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body, html {
-            margin: 0;
-            padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: var(--color-bg);
-            color: var(--color-text-primary);
-            font-family: var(--font-main);
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            background-color: #05070a;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- Dark Cinematic Background --- */
-        #game-stage {
+        /* Cinematic Background */
+        #stage {
             position: relative;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.8) 100%),
-                url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjEwODAiIHZpZXdCb3g9IjAgMCAxOTIwIDEwODAiPjxmaWx0ZXIgaWQ9Im4iPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjkiIHN0aWNoVGlsZXM9InN0aWNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD9iMTArIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjAuMDUiLz48L3N2Zz4='); /* Dust/Noise */
-            background-size: cover;
-            background-position: center;
+            background: radial-gradient(circle at 70% 30%, #1a2230 0%, #05070a 100%);
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- Realistic Male Protagonist (CSS Generated Art) --- */
-        #character-art {
+        #stage::before {
+            content: "";
             position: absolute;
-            left: -10%;
-            bottom: -5%;
-            width: 80vh; /* Scaled to height */
-            height: 90vh;
-            z-index: 1;
-            /* Gritty, weathered look achieved via gradients/shadows */
-            background: 
-                /* Jaw/Shadows */
-                radial-gradient(ellipse at 50% 60%, rgba(10, 10, 15, 0.9) 0%, rgba(10, 10, 15, 0) 60%),
-                /* Skin Tones/Weathering */
-                conic-gradient(from 180deg at 50% 45%, #2c211a 0deg, #3d2e24 60deg, #4d3c30 120deg, #3d2e24 180deg, #2c211a 240deg),
-                /* Eye sockets */
-                radial-gradient(circle at 40% 40%, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 10%),
-                radial-gradient(circle at 60% 40%, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 10%);
-            border-radius: 40% 40% 5px 5px;
-            box-shadow: 20px -20px 60px rgba(0,0,0,0.8) inset;
-            opacity: 0.9;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3C%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
         }
-        /* Tactical Jacket Layer */
-        #character-art::after {
-            content: '';
+
+        /* --- Character Illustration Area --- */
+        #character-layer {
             position: absolute;
             bottom: 0;
-            left: 10%;
-            width: 80%;
-            height: 60%;
+            left: -5%;
+            width: 85vh;
+            height: 90vh;
+            z-index: 1;
+            pointer-events: none;
+            /* Stylized Mature Professional Silhouette/Portrait */
             background: 
-                /* Straps/Webbing */
-                linear-gradient(90deg, transparent 40%, #111 40%, #111 42%, transparent 42%, transparent 58%, #111 58%, #111 60%, transparent 60%),
-                linear-gradient(180deg, #1a1f26 0%, #101317 100%); /* Olive/Dark Grey */
-            border-radius: 15px 15px 0 0;
-            border: 1px solid rgba(255,255,255,0.05);
+                linear-gradient(to top, #05070a 5%, transparent 40%),
+                radial-gradient(ellipse at 50% 40%, rgba(197, 160, 89, 0.15) 0%, transparent 70%),
+                conic-gradient(from 180deg at 50% 30%, #0f141a, #1a2230, #0f141a);
+            mask-image: linear-gradient(to right, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* --- Realistic Game UI Overlays --- */
-        .ui-element {
+        /* Character Details (Abstract High-End) */
+        #character-layer::after {
+            content: "";
             position: absolute;
+            top: 15%; left: 35%;
+            width: 30%; height: 40%;
+            background: radial-gradient(circle at 50% 30%, #2a3545 0%, transparent 80%);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.5;
+        }
+
+        /* --- Top HUD --- */
+        #hud {
+            position: relative;
             z-index: 10;
-            pointer-events: auto;
-        }
-
-        /* 1. Top HUD (Resources/Status) */
-        #hud-top {
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
-            font-family: sans-serif;
-            font-weight: bold;
-            font-size: 13px;
-            letter-spacing: 1px;
-        }
-
-        .hud-group {
-            display: flex;
-            gap: 25px;
-            color: var(--color-text-secondary);
-        }
-
-        .hud-stat span {
-            color: var(--color-text-primary);
-            font-size: 16px;
-            text-shadow: var(--glow);
-        }
-        
-        #chapter-title {
-            color: var(--color-accent);
-            font-size: 18px;
-            text-transform: uppercase;
-        }
-
-        /* 2. Mission/Objective Box (Right Side) */
-        #mission-box {
-            top: 80px;
-            right: 20px;
-            width: 280px;
-            background: var(--color-ui-bg);
-            border: 1px solid var(--color-ui-border);
-            padding: 15px;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        .ui-header {
-            color: var(--color-accent);
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-            border-bottom: 1px solid var(--color-ui-border);
-            padding-bottom: 4px;
-        }
-
-        #objective-text {
-            font-size: 15px;
-            line-height: 1.4;
-            color: var(--color-text-primary);
-            margin-bottom: 10px;
-        }
-
-        .reward-tag {
-            font-size: 12px;
-            color: var(--color-success);
-            background: rgba(0, 255, 136, 0.1);
-            padding: 2px 6px;
-            border-radius: 2px;
-        }
-
-        /* 3. Dialogue/Narrative Box (Center-Bottom) */
-        #dialogue-box {
-            bottom: 130px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
-            background: rgba(5, 6, 8, 0.9);
-            border-left: 3px solid var(--color-accent);
+            height: 80px;
             padding: 20px;
-            box-sizing: border-box;
-            opacity: 1;
-            transition: opacity 0.3s ease;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 80px;
+            gap: 10px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
         }
 
-        #speaker-name {
-            color: var(--color-accent);
-            font-weight: bold;
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-dim);
             text-transform: uppercase;
-            font-size: 14px;
-            margin-bottom: 5px;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
         }
 
-        #dialogue-text {
+        .stat-value {
             font-size: 16px;
-            line-height: 1.5;
-            color: var(--color-text-primary);
+            font-weight: 700;
+            color: var(--gold);
+            text-shadow: 0 0 10px var(--gold-glow);
         }
 
-        /* 4. Main Action Buttons (Bottom) */
-        #action-bar {
-            bottom: 30px;
-            left: 0;
+        .stat-value.danger { color: var(--danger); text-shadow: none; }
+
+        /* --- Main Event UI --- */
+        #main-ui {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        #event-card {
+            align-self: flex-end;
+            width: 380px;
+            background: var(--ui-panel);
+            border-left: 2px solid var(--gold);
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: -10px 10px 30px rgba(0,0,0,0.5);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chapter-tag {
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .event-title {
+            font-size: 20px;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .event-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* --- Dialogue --- */
+        #dialogue-wrapper {
             width: 100%;
+            max-width: 700px;
+            margin: 0 auto 20px 20%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            min-height: 80px;
+        }
+
+        #speaker {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        #text-content {
+            font-size: 15px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* --- Action Controls --- */
+        #action-grid {
             display: flex;
             justify-content: center;
             gap: 15px;
-            padding: 0 20px;
-            box-sizing: border-box;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .game-btn {
+        .btn-action {
             flex: 1;
-            max-width: 200px;
             height: 60px;
-            background: linear-gradient(180deg, #222 0%, #111 100%);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--color-text-primary);
-            font-family: sans-serif;
-            font-size: 18px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            background: linear-gradient(135deg, #1a2230 0%, #0f141a 100%);
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            color: white;
             cursor: pointer;
-            transition: all 0.1s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
             position: relative;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* Premium button look */
-        .game-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(255,255,255,0.1);
+        .btn-action:hover {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, #252e3d 0%, #1a2230 100%);
         }
 
-        .game-btn:active {
-            transform: scale(0.97);
-            border-color: var(--color-accent);
-            box-shadow: var(--glow);
+        .btn-action:active {
+            transform: scale(0.96);
+            background: var(--gold);
+            color: black;
         }
 
-        /* Specific styles for context */
-        .btn-danger {
-            border-color: rgba(255, 68, 68, 0.3);
-        }
-        .btn-danger:active {
-            border-color: var(--color-danger);
-            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
-        }
+        .btn-label { font-size: 16px; font-weight: bold; }
+        .btn-sub { font-size: 9px; opacity: 0.6; text-transform: uppercase; margin-top: 2px; }
 
-        .btn-prime {
-            border-color: var(--color-ui-border);
-            background: linear-gradient(180deg, #332b1a 0%, #1a160d 100%);
-        }
-
-        /* --- Result Overlay (Modal) --- */
-        #result-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+        /* --- Feedback Modal --- */
+        #overlay {
+            position: fixed;
+            inset: 0;
             background: rgba(0,0,0,0.9);
             z-index: 100;
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            justify-content: center;
+            display: none;
             align-items: center;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            justify-content: center;
+            padding: 40px;
         }
 
-        #result-overlay.active {
-            display: flex;
-        }
-
-        #result-title {
-            font-size: 48px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 20px;
-            text-shadow: var(--glow);
-        }
-        
-        #result-title.success { color: var(--color-success); }
-        #result-title.failure { color: var(--color-danger); }
-
-        #result-summary {
-            font-size: 18px;
-            color: var(--color-text-secondary);
+        #report-card {
+            background: #111;
+            border: 1px solid var(--gold);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
             text-align: center;
-            max-width: 80%;
-            line-height: 1.6;
-            margin-bottom: 40px;
         }
 
-        #restart-btn {
-            width: 250px;
+        .report-header { font-size: 24px; color: var(--gold); margin-bottom: 20px; }
+        .report-stat { display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .report-btn { 
+            margin-top: 30px; 
+            width: 100%; 
+            padding: 15px; 
+            background: var(--gold); 
+            color: black; 
+            border: none; 
+            font-weight: bold;
+            cursor: pointer;
         }
 
+        /* --- Responsive Tweaks --- */
+        @media (max-width: 768px) {
+            #hud { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: auto; }
+            #event-card { width: 100%; }
+            #character-layer { opacity: 0.3; left: -20%; }
+            #dialogue-wrapper { margin-left: 0; }
+            #action-grid { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 
-<div id="game-stage">
-    
-    <div id="character-art"></div>
+<div id="stage">
+    <div id="character-layer"></div>
 
-    <div id="hud-top" class="ui-element">
-        <div id="chapter-title">第 01 章：封鎖線</div>
-        <div class="hud-group">
-            <div class="hud-stat">營救對象: <span id="stat-targets">05</span></div>
-            <div class="hud-stat">小隊壓力: <span id="stat-stress">10%</span></div>
-            <div class="hud-stat">物資水平: <span id="stat-supplies">高</span></div>
+    <div id="hud">
+        <div class="stat-box">
+            <div class="stat-label">現值營收 / 支出</div>
+            <div id="cash-stat" class="stat-value">$125,000 / $80,000</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">決策壓力</div>
+            <div id="stress-stat" class="stat-value">22%</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">系統穩定度</div>
+            <div id="stable-stat" class="stat-value">92%</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">剩餘資源</div>
+            <div id="intel-stat" class="stat-value">12 Units</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">月份</div>
+            <div id="month-stat" class="stat-value" style="color:white">M1</div>
         </div>
     </div>
 
-    <div id="mission-box" class="ui-element">
-        <div class="ui-header">當前目標</div>
-        <div id="objective-text">穿越商業區廢墟，定位失聯的醫療班。避免正面衝突。</div>
-        <div class="reward-tag">完成獎勵: +10 彈藥, 壓力-5%</div>
-    </div>
+    <main id="main-ui">
+        <div id="event-card">
+            <span id="chapter-label" class="chapter-tag">CHAPTER 01: THE SURVIVAL GAP</span>
+            <h2 id="event-title" class="event-title">現金流斷裂危機</h2>
+            <p id="event-desc" class="event-desc">
+                初期研發投入過高，帳面餘額僅夠支撐兩個月。目前有三個方向可以調整。你打算如何分配下一階段的精力？
+            </p>
+        </div>
 
-    <div id="dialogue-box" class="ui-element">
-        <div id="speaker-name">指揮官「老班」</div>
-        <div id="dialogue-text">聽著，小隊。這不是演習。封鎖區內的雜訊越來越嚴重了。我們必須在日落前找到他們。保持安靜，動作快。</div>
-    </div>
+        <div id="dialogue-wrapper">
+            <div id="speaker">顧問 Marcus</div>
+            <div id="text-content">「我們需要一口氣，不論是錢還是時間。在這個階段，活下去比美譽度更重要。」</div>
+        </div>
 
-    <div id="action-bar" class="ui-element">
-        <button class="game-btn btn-prime" onclick="handleAction('tactical')">戰術推進</button>
-        <button class="game-btn" onclick="handleAction('scout')">派人偵查</button>
-        <button class="game-btn btn-danger" onclick="handleAction('force')">強行突入</button>
-    </div>
+        <div id="action-grid">
+            <button class="btn-action" onclick="makeChoice(0)">
+                <span id="btn-0-title" class="btn-label">接低價短案</span>
+                <span class="btn-sub">快速補血 / 壓力增加</span>
+            </button>
+            <button class="btn-action" onclick="makeChoice(1)">
+                <span id="btn-1-title" class="btn-label">升級高價報價包</span>
+                <span class="btn-sub">品牌溢價 / 週期較長</span>
+            </button>
+            <button class="btn-action" onclick="makeChoice(2)">
+                <span id="btn-2-title" class="btn-label">縮減固定支出</span>
+                <span class="btn-sub">穩定度下降 / 換取時間</span>
+            </button>
+        </div>
+    </main>
 
-</div>
-
-<div id="result-overlay">
-    <div id="result-title">任務總結</div>
-    <div id="result-summary">
-        戰報：在商業區的行動...<br>
-        成功營救：0 名 <br>
-        小隊傷亡：0 名 <br>
-        最終評價：待定
+    <div id="overlay">
+        <div id="report-card">
+            <h1 id="modal-title" class="report-header">決策回饋</h1>
+            <div id="modal-content">
+                </div>
+            <button class="report-btn" onclick="closeModal()">確認並執行下一步</button>
+        </div>
     </div>
-    <button class="game-btn btn-prime" id="restart-btn" onclick="resetGame()">重啟協議</button>
 </div>
 
 <script>
-    // --- Game State & Logic ---
-
-    const gameState = {
-        chapter: 1,
-        targets: 5,
-        stress: 10,
-        supplies: 100, // 100=高, 50=中, 0=無
-        step: 0
-    };
-
-    const script = [
-        // Chapter 1
+    // --- Data Configuration ---
+    const chapters = [
         {
-            objective: "穿越商業區廢墟，定位失聯的醫療班。避免正面衝突。",
-            speaker: "指揮官「老班」",
-            text: "聽著，小隊。這不是演習。封鎖區內的雜訊越來越嚴重了。我們必須在日落前找到他們。保持安靜，動作快。",
-            actions: ["戰術推進", "派人偵查", "強行突入"]
+            month: "M1",
+            label: "CHAPTER 01: 現金流與生存",
+            title: "首月的策略分歧點",
+            desc: "市場反響不如預期，你必須在「現金」與「價值」間做出抉擇。團隊正在等待你的指示。",
+            speaker: "Marcus",
+            dialogue: "「記住，創始人的體力也是一種成本，別在沒意義的磨合中耗盡它。」",
+            options: [
+                { title: "接低價代工", sub: "補足短期現金", cash: 50000, stress: 15, stable: -5, msg: "獲得急救金，但你正陷入低價值勞動的陷阱。" },
+                { title: "磨合高單價產品", sub: "建立毛利護城河", cash: -20000, stress: 5, stable: 10, msg: "品牌力提升，但現金流變得非常緊繃。" },
+                { title: "暫停所有研發", sub: "砍掉固定支出", cash: 10000, stress: -10, stable: -20, msg: "壓力減輕，但你的產品研發進度已經停滯。" }
+            ]
         },
         {
-            objective: "封鎖區-中段",
-            speaker: "偵察兵「影子」",
-            text: "頭兒，前方發現掠奪者哨站。大約六個人，火力不明。繞過去會多花半小時，但能避開。怎麼做？",
-            actions: ["悄悄繞過", "潛行暗殺", "正面突襲"]
+            month: "M2",
+            label: "CHAPTER 02: 規模化與槓桿",
+            title: "產能瓶頸出現",
+            desc: "訂單開始進來了，但你的時間被瑣事塞滿。你需要引進「槓桿」來解放生產力。",
+            speaker: "Marcus",
+            dialogue: "「你自己做確實最完美，但你打算一輩子只做這幾件嗎？」",
+            options: [
+                { title: "啟動 AI 流程", sub: "自動化工作流", cash: -30000, stress: -5, stable: 25, msg: "生產力大幅釋放，系統穩定度顯著上升。" },
+                { title: "外包部分產能", sub: "購買他人時間", cash: -15000, stress: -10, stable: 5, msg: "你換取了決策空間，但成本結構開始變重。" },
+                { title: "維持單人模式", sub: "極致利潤化", cash: 40000, stress: 30, stable: -10, msg: "利潤極高，但你的心理健康值已瀕臨臨界點。" }
+            ]
         },
-        // Chapter 2
         {
-            objective: "找到醫療班，但他們被困在翻覆的裝甲車內。",
-            speaker: "指揮官「老班」",
-            text: "該死，他們被困住了。裝甲車在漏油。我們沒有太多時間，掠奪者的支援隨時會到。",
-            actions: ["切割裝甲", "火力掩護", "建立防線"]
-        },
-        // Chapter 3
-        {
-            objective: "護送傷員前往撤離點。",
-            speaker: "醫療兵「哈利」",
-            text: "老班，這兩個傷員撐不了多久了。我們需要更快的路徑，即使這意味著要暴露在空曠地帶。",
-            actions: ["抄近路", "穩扎穩打", "強行軍"]
+            month: "M3",
+            label: "CHAPTER 03: 商業終局之戰",
+            title: "品牌 vs 通路",
+            desc: "產品成熟了。現在要決定是深耕自有品牌，還是快速鋪設通路擴大規模？",
+            speaker: "Marcus",
+            dialogue: "「這是最後一跳。要當隱形冠軍，還是要成為市場焦點？」",
+            options: [
+                { title: "重金砸品牌", sub: "長期溢價策略", cash: -60000, stress: 20, stable: 15, msg: "你贏得了市場尊重，未來擁有極強的報價權。" },
+                { title: "主攻通路分潤", sub: "換取市佔率", cash: 80000, stress: 5, stable: -5, msg: "現金爆發，你成功建立了一台賺錢機器。" },
+                { title: "建立 SOP 授權", sub: "商業模式輕量化", cash: 30000, stress: -15, stable: 30, msg: "你成功脫離了勞動，轉向資本與智力授權模式。" }
+            ]
         }
     ];
 
-    const results = {
-        success: { title: "任務達成", class: "success" },
-        failure: { title: "任務失敗", class: "failure" }
+    // --- State Manager ---
+    let currentStep = 0;
+    let stats = {
+        cash: 125000,
+        stress: 22,
+        stable: 92,
+        intel: 12
     };
 
-    // --- UI Update Functions ---
+    function updateUI() {
+        // Stats
+        document.getElementById('cash-stat').innerText = `$${stats.cash.toLocaleString()} / $80,000`;
+        document.getElementById('stress-stat').innerText = `${stats.stress}%`;
+        document.getElementById('stable-stat').innerText = `${stats.stable}%`;
+        document.getElementById('month-stat').innerText = chapters[currentStep]?.month || "END";
 
-    function updateHUD() {
-        document.getElementById('chapter-title').innerText = `第 ${String(gameState.chapter).padStart(2, '0')} 章：${getChapterName()}`;
-        document.getElementById('stat-targets').innerText = String(gameState.targets).padStart(2, '0');
-        document.getElementById('stat-stress').innerText = `${gameState.stress}%`;
-        
-        let supText = "高";
-        if (gameState.supplies < 30) supText = "缺乏";
-        else if (gameState.supplies < 70) supText = "中";
-        document.getElementById('stat-supplies').innerText = supText;
+        // Stress visual warning
+        document.getElementById('stress-stat').className = stats.stress > 60 ? 'stat-value danger' : 'stat-value';
 
-        // Visual feedback for high stress
-        if (gameState.stress > 70) {
-            document.getElementById('stat-stress').style.color = 'var(--color-danger)';
-        } else {
-            document.getElementById('stat-stress').style.color = 'var(--color-text-primary)';
+        // Content
+        if (currentStep < chapters.length) {
+            const data = chapters[currentStep];
+            document.getElementById('chapter-label').innerText = data.label;
+            document.getElementById('event-title').innerText = data.title;
+            document.getElementById('event-desc').innerText = data.desc;
+            document.getElementById('speaker').innerText = `顧問 ${data.speaker}`;
+            document.getElementById('text-content').innerText = data.dialogue;
+
+            // Buttons
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`btn-${i}-title`).innerText = data.options[i].title;
+                document.querySelector(`#action-grid button:nth-child(${i+1}) .btn-sub`).innerText = data.options[i].sub;
+            }
         }
     }
 
-    function updateDialogueAndMission() {
-        if (gameState.step >= script.length) {
+    function makeChoice(idx) {
+        const option = chapters[currentStep].options[idx];
+        
+        // Apply Changes
+        stats.cash += option.cash;
+        stats.stress += option.stress;
+        stats.stable += option.stable;
+
+        // Show Modal
+        const modal = document.getElementById('overlay');
+        const content = document.getElementById('modal-content');
+        content.innerHTML = `
+            <p style="margin-bottom:20px; line-height:1.6;">${option.msg}</p>
+            <div class="report-stat"><span>現金流變動</span><span style="color:${option.cash > 0 ? 'var(--success)' : 'var(--danger)'}">${option.cash > 0 ? '+' : ''}${option.cash}</span></div>
+            <div class="report-stat"><span>壓力增減</span><span style="color:var(--gold)">${option.stress > 0 ? '+' : ''}${option.stress}%</span></div>
+            <div class="report-stat"><span>穩定度影響</span><span style="color:var(--success)">${option.stable > 0 ? '+' : ''}${option.stable}%</span></div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').style.display = 'none';
+        currentStep++;
+        
+        if (currentStep >= chapters.length) {
             showFinalReport();
-            return;
+        } else {
+            updateUI();
         }
-
-        const current = script[gameState.step];
-        document.getElementById('objective-text').innerText = current.objective;
-        document.getElementById('speaker-name').innerText = current.speaker;
-        
-        // Narrative text animation (simple)
-        const textEl = document.getElementById('dialogue-text');
-        textEl.style.opacity = 0;
-        setTimeout(() => {
-            textEl.innerText = current.text;
-            textEl.style.opacity = 1;
-        }, 150);
-
-        // Update Button Labels
-        const buttons = document.querySelectorAll('#action-bar .game-btn');
-        buttons[0].innerText = current.actions[0];
-        buttons[1].innerText = current.actions[1];
-        buttons[2].innerText = current.actions[2];
-    }
-
-    function getChapterName() {
-        if (gameState.step < 2) return "封鎖線";
-        if (gameState.step < 3) return "救援點";
-        return "撤離之路";
-    }
-
-    // --- Interactive Logic ---
-
-    function handleAction(actionType) {
-        if (document.getElementById('result-overlay').classList.contains('active')) return;
-
-        // Game simulation logic based on action
-        let dialogueResponse = "";
-
-        switch (gameState.step) {
-            case 0: // Ch1-S1
-                if (actionType === 'tactical') {
-                    gameState.stress += 5;
-                    gameState.supplies -= 10;
-                    dialogueResponse = "保持隊形，穩定推進。注意死角。";
-                } else if (actionType === 'scout') {
-                    gameState.stress -= 5;
-                    dialogueResponse = "影子，去前方探路。確認安全後回報。";
-                } else if (actionType === 'force') {
-                    gameState.stress += 20;
-                    gameState.supplies -= 20;
-                    dialogueResponse = "直接衝過去！殺他們個措手不及！(風險極高)";
-                }
-                break;
-            case 1: // Ch1-S2
-                if (actionType === 'tactical') { // 悄悄繞過
-                    gameState.stress += 10; 
-                    dialogueResponse = "同意。沒必要在這裡浪費彈藥。全員靜默。";
-                } else if (actionType === 'scout') { // 潛行暗殺
-                    gameState.stress += 5; gameState.supplies -= 5;
-                    dialogueResponse = "影子，幹掉哨兵。我們在後面掩護。";
-                } else if (actionType === 'force') { // 正面突襲
-                    gameState.stress += 25; gameState.targets -= 1; gameState.supplies -= 30;
-                    dialogueResponse = "幹！交火了！醫療班可能聽到了...糟了，一名隊員受傷。";
-                }
-                gameState.chapter = 2;
-                break;
-            case 2: // Ch2-S1
-                if (actionType === 'tactical') { // 切割
-                    gameState.targets -= 1; gameState.stress += 15;
-                    dialogueResponse = "動作快！漏油越來越嚴重了...該死，火光引來了更多掠奪者。";
-                } else if (actionType === 'scout') { // 火力掩護
-                    gameState.supplies -= 40; gameState.stress += 5;
-                    dialogueResponse = "壓制射擊！別讓他們靠近裝甲車！我們需要時間。";
-                } else if (actionType === 'force') { // 防線
-                    gameState.stress += 10;
-                    dialogueResponse = "建立防線。影子，你在高處就位。醫療兵去救人。";
-                }
-                gameState.chapter = 3;
-                break;
-            case 3: // Ch3-S1
-                if (actionType === 'tactical') { // 抄近路
-                    gameState.targets -= 2; gameState.stress += 30;
-                    dialogueResponse = "衝！別回頭！...糟了，埋伏！傷員...我們失去了他們。";
-                } else if (actionType === 'scout') { // 穩扎穩打
-                    gameState.stress += 5; gameState.supplies -= 10;
-                    dialogueResponse = "保持警惕。寧可慢一點，也要全活著回去。";
-                } else if (actionType === 'force') { // 強行軍
-                    gameState.stress += 15; gameState.supplies -= 5;
-                    dialogueResponse = "咬緊牙關，這最後幾哩路了！撐下去！";
-                }
-                break;
-        }
-
-        // Apply state limits
-        gameState.stress = Math.max(0, Math.min(100, gameState.stress));
-        gameState.targets = Math.max(0, gameState.targets);
-
-        // Character responds to the click immediately
-        document.getElementById('dialogue-text').innerText = dialogueResponse;
-        document.getElementById('speaker-name').innerText = "指揮官「老班」";
-        
-        updateHUD();
-
-        // Advance story after a short delay
-        gameState.step++;
-        setTimeout(updateDialogueAndMission, 1200);
     }
 
     function showFinalReport() {
-        const overlay = document.getElementById('result-overlay');
-        const title = document.getElementById('result-title');
-        const summary = document.getElementById('result-summary');
-
-        let eval = "C";
-        if (gameState.targets >= 4 && gameState.stress < 40) {
-            eval = "A (傑出)";
-            title.className = "success";
-            title.innerText = "協議達成";
-        } else if (gameState.targets >= 2) {
-            eval = "B (合格)";
-            title.className = "";
-            title.innerText = "任務總結";
-        } else {
-            eval = "D (慘烈)";
-            title.className = "failure";
-            title.innerText = "協議失敗";
-        }
-
-        summary.innerHTML = `
-            戰報：撤離協議已終止。<br><br>
-            成功營救：${gameState.targets} / 5 名 <br>
-            小隊壓力：${gameState.stress}% <br>
-            最終評價：${eval}
-        `;
-
-        overlay.classList.add('active');
-    }
-
-    function resetGame() {
-        gameState.chapter = 1;
-        gameState.targets = 5;
-        gameState.stress = 10;
-        gameState.supplies = 100;
-        gameState.step = 0;
+        const modal = document.getElementById('overlay');
+        const title = document.getElementById('modal-title');
+        const content = document.getElementById('modal-content');
         
-        document.getElementById('result-overlay').classList.remove('active');
-        updateHUD();
-        updateDialogueAndMission();
+        title.innerText = "季度經營結算";
+        let rating = stats.cash > 200000 ? "S+ 卓越企業家" : (stats.cash > 100000 ? "A 穩定經營者" : "C 生存邊緣人");
+        
+        content.innerHTML = `
+            <h2 style="color:white; margin-bottom:20px;">${rating}</h2>
+            <div class="report-stat"><span>最終資產</span><span style="color:var(--gold)">$${stats.cash.toLocaleString()}</span></div>
+            <div class="report-stat"><span>身心磨損</span><span>${stats.stress}%</span></div>
+            <div class="report-stat"><span>架構完整性</span><span>${stats.stable}%</span></div>
+            <p style="margin-top:20px; font-size:12px; color:var(--text-dim)">你在本季度的決策決定了下一輪融資的起點。</p>
+        `;
+        
+        const btn = document.querySelector('.report-btn');
+        btn.innerText = "重新開始模擬";
+        btn.onclick = () => location.reload();
+        modal.style.display = 'flex';
     }
 
-    // --- Initialization ---
-    // Start the loop
-    updateHUD();
-    updateDialogueAndMission();
-
+    // Init
+    updateUI();
 </script>
+
 </body>
 </html>
