@@ -3,480 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SOLO VENTURE: THE CEO PROTOCOL</title>
+    <title>THE FOUNDER: STRATEGY PROTOCOL</title>
     <style>
         :root {
-            --gold: #c5a059;
-            --gold-glow: rgba(197, 160, 89, 0.4);
-            --deep-blue: #0a0e14;
-            --ui-panel: rgba(16, 20, 28, 0.9);
-            --text-main: #e0e4eb;
-            --text-dim: #8a929e;
-            --danger: #ff4d4d;
-            --success: #00ffaa;
-            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --color-bg: #05070a;
+            --color-panel: rgba(10, 15, 25, 0.85);
+            --color-border: #cda052; /* Gold */
+            --color-text-primary: #e0e6ed;
+            --color-text-secondary: #8a9bb0;
+            --color-accent: #f5c461;
+            --color-danger: #ff4d4d;
+            --color-success: #00ffaa;
+            --font-family: 'Montserrat', sans-serif; /* Simplified for self-contained, assuming common loads */
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
 
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #05070a;
-            color: var(--text-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
             font-family: var(--font-family);
             -webkit-font-smoothing: antialiased;
         }
 
         /* Cinematic Background */
-        #stage {
+        #game-stage {
             position: relative;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 70% 30%, #1a2230 0%, #05070a 100%);
-            display: flex;
-            flex-direction: column;
-        }
-
-        #stage::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3C%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-        }
-
-        /* --- Character Illustration Area --- */
-        #character-layer {
-            position: absolute;
-            bottom: 0;
-            left: -5%;
-            width: 85vh;
-            height: 90vh;
-            z-index: 1;
-            pointer-events: none;
-            /* Stylized Mature Professional Silhouette/Portrait */
             background: 
-                linear-gradient(to top, #05070a 5%, transparent 40%),
-                radial-gradient(ellipse at 50% 40%, rgba(197, 160, 89, 0.15) 0%, transparent 70%),
-                conic-gradient(from 180deg at 50% 30%, #0f141a, #1a2230, #0f141a);
-            mask-image: linear-gradient(to right, black 70%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
-            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* Character Details (Abstract High-End) */
-        #character-layer::after {
-            content: "";
-            position: absolute;
-            top: 15%; left: 35%;
-            width: 30%; height: 40%;
-            background: radial-gradient(circle at 50% 30%, #2a3545 0%, transparent 80%);
-            border-radius: 50%;
-            filter: blur(40px);
-            opacity: 0.5;
-        }
-
-        /* --- Top HUD --- */
-        #hud {
-            position: relative;
-            z-index: 10;
-            height: 80px;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 80px;
-            gap: 10px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
-        }
-
-        .stat-box {
+                radial-gradient(circle at 70% 30%, #1a253a 0%, #05070a 100%),
+                url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA0IDQiPjxmaWx0ZXIgaWQ9Im4iPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjgiIHN0aWNoVGlsZXM9InN0aWNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD9iMTArIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjAuMDQiLz48L3N2Zz4='); /* Subtle Noise */
             display: flex;
             flex-direction: column;
-            justify-content: center;
+        }
+
+        /* --- Mature Character Illustration (3/4 view, leaning) --- */
+        #character-art {
+            position: absolute;
+            left: -10%;
+            bottom: -5%;
+            width: 80vh; /* Scale based on height */
+            height: 95vh;
+            z-index: 1;
+            opacity: 0.95;
+            /* Mature Founder Silhouette: Dark suit, confident posture, weathered yet sharp */
+            background: 
+                /* Subtle lighting/Glow */
+                radial-gradient(ellipse at 50% 40%, rgba(205, 160, 82, 0.15) 0%, rgba(205, 160, 82, 0) 60%),
+                /* Core Figure definition via intricate gradients */
+                conic-gradient(from 180deg at 50% 45%, #151a25 0deg, #252e3d 60deg, #151a25 120deg, #10141a 180deg, #151a25 240deg),
+                /* Dark tones for suit/shadows */
+                radial-gradient(circle at 45% 35%, #0a0e14 0%, transparent 15%),
+                linear-gradient(to bottom, transparent 20%, #05070a 100%);
+            border-radius: 45% 45% 0 0;
+            box-shadow: 20px -10px 60px rgba(0,0,0,0.9) inset;
+        }
+
+        /* --- Game UI Overlays --- */
+        .ui-element {
+            position: absolute;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        /* 1. TOP HUD: Metrics */
+        #hud-top {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) auto;
+            align-items: center;
+            padding: 0 30px;
+            gap: 15px;
+            border-bottom: 1px solid rgba(205, 160, 82, 0.1);
+        }
+
+        .hud-stat {
+            display: flex;
+            flex-direction: column;
         }
 
         .stat-label {
-            font-size: 10px;
-            color: var(--text-dim);
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            color: var(--color-text-secondary);
             margin-bottom: 2px;
         }
 
         .stat-value {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
-            color: var(--gold);
-            text-shadow: 0 0 10px var(--gold-glow);
+            color: var(--color-accent);
+            text-shadow: 0 0 10px rgba(205, 160, 82, 0.5);
+        }
+        
+        #current-month {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-text-primary);
+            background: rgba(205, 160, 82, 0.1);
+            padding: 5px 15px;
+            border-radius: 2px;
+            border: 1px solid rgba(205, 160, 82, 0.2);
         }
 
-        .stat-value.danger { color: var(--danger); text-shadow: none; }
-
-        /* --- Main Event UI --- */
-        #main-ui {
-            position: relative;
-            z-index: 5;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 20px;
-            padding-bottom: 40px;
-        }
-
+        /* 2. CENTRE-RIGHT: Business Event/Chapter Box */
         #event-card {
-            align-self: flex-end;
+            top: 100px;
+            right: 40px;
             width: 380px;
-            background: var(--ui-panel);
-            border-left: 2px solid var(--gold);
-            padding: 20px;
-            margin-bottom: 20px;
+            background: var(--color-panel);
+            border-left: 2px solid var(--color-border);
+            padding: 25px;
+            box-shadow: -10px 10px 30px rgba(0,0,0,0.6);
             backdrop-filter: blur(10px);
-            box-shadow: -10px 10px 30px rgba(0,0,0,0.5);
-            animation: slideIn 0.6s ease-out;
+            -webkit-backdrop-filter: blur(10px);
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .chapter-tag {
-            color: var(--gold);
-            font-size: 12px;
+        .chapter-title {
+            color: var(--color-border);
+            text-transform: uppercase;
+            font-size: 13px;
             font-weight: bold;
-            margin-bottom: 8px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
             display: block;
         }
 
-        .event-title {
-            font-size: 20px;
-            margin-bottom: 12px;
+        #event-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
             letter-spacing: -0.5px;
         }
 
-        .event-desc {
-            font-size: 14px;
-            color: var(--text-dim);
+        #event-desc {
+            font-size: 15px;
             line-height: 1.6;
+            color: var(--color-text-secondary);
         }
 
-        /* --- Dialogue --- */
+        /* 3. CENTRE-BOTTOM: Advisor Dialogue */
         #dialogue-wrapper {
-            width: 100%;
-            max-width: 700px;
-            margin: 0 auto 20px 20%;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
-            min-height: 80px;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 800px;
+            margin-left: 10%; /* Account for character on left */
+            background: rgba(0,0,0,0.75);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
 
-        #speaker {
-            font-size: 12px;
-            color: var(--gold);
+        /* Advisor/CEO icon - placeholder (simple profile) */
+        #speaker-icon {
+            width: 60px;
+            height: 60px;
+            background: 
+                radial-gradient(circle at 50% 30%, #303a4d 0%, #151a25 80%);
+            border-radius: 50%;
+            border: 2px solid var(--color-border);
+            flex-shrink: 0;
+        }
+
+        #speaker-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #speaker-name {
+            font-size: 14px;
+            color: var(--color-border);
             font-weight: bold;
             margin-bottom: 5px;
             text-transform: uppercase;
         }
 
-        #text-content {
-            font-size: 15px;
+        #dialogue-content {
+            font-size: 16px;
             line-height: 1.5;
+            color: var(--color-text-primary);
             font-style: italic;
         }
 
-        /* --- Action Controls --- */
+        /* 4. BOTTOM ACTION BAR: 3 Large Buttons */
         #action-grid {
+            bottom: 30px;
+            left: 0;
+            width: 100%;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
+            gap: 20px;
+            padding: 0 40px;
+            pointer-events: none; /* Let clicks pass to buttons */
         }
 
-        .btn-action {
+        .action-btn {
+            pointer-events: auto;
             flex: 1;
-            height: 60px;
-            background: linear-gradient(135deg, #1a2230 0%, #0f141a 100%);
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            color: white;
+            max-width: 250px;
+            height: 70px;
+            background: linear-gradient(180deg, #151a25 0%, #0a0d14 100%);
+            border: 1px solid rgba(205, 160, 82, 0.3);
+            color: var(--color-text-primary);
+            font-family: inherit;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             position: relative;
             overflow: hidden;
-        }
-
-        .btn-action:hover {
-            border-color: var(--gold);
-            background: linear-gradient(135deg, #252e3d 0%, #1a2230 100%);
-        }
-
-        .btn-action:active {
-            transform: scale(0.96);
-            background: var(--gold);
-            color: black;
-        }
-
-        .btn-label { font-size: 16px; font-weight: bold; }
-        .btn-sub { font-size: 9px; opacity: 0.6; text-transform: uppercase; margin-top: 2px; }
-
-        /* --- Feedback Modal --- */
-        #overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 100;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-        }
-
-        #report-card {
-            background: #111;
-            border: 1px solid var(--gold);
-            width: 100%;
-            max-width: 450px;
-            padding: 30px;
             text-align: center;
         }
 
-        .report-header { font-size: 24px; color: var(--gold); margin-bottom: 20px; }
-        .report-stat { display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        .report-btn { 
-            margin-top: 30px; 
-            width: 100%; 
-            padding: 15px; 
-            background: var(--gold); 
-            color: black; 
-            border: none; 
-            font-weight: bold;
-            cursor: pointer;
+        /* Premium hover/click effects */
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(255,255,255,0.08);
         }
 
-        /* --- Responsive Tweaks --- */
-        @media (max-width: 768px) {
-            #hud { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: auto; }
-            #event-card { width: 100%; }
-            #character-layer { opacity: 0.3; left: -20%; }
-            #dialogue-wrapper { margin-left: 0; }
-            #action-grid { flex-direction: column; }
+        .action-btn:hover {
+            border-color: var(--color-border);
+            box-shadow: 0 0 15px rgba(205, 160, 82, 0.4);
+            transform: translateY(-2px);
         }
+
+        .action-btn:active {
+            transform: scale(0.97) translateY(0);
+            background: linear-gradient(180deg, #1f2736 0%, #151a25 100%);
+        }
+
+        /* Specific Button Types */
+        .btn-priority {
+            background: linear-gradient(180deg, #c4a162 0%, #9a7d4a 100%);
+            color: #111;
+            border: none;
+        }
+        .btn-priority:hover {
+            box-shadow: 0 0 25px rgba(205, 160, 82, 0.6);
+        }
+        .btn-priority:active {
+            background: linear-gradient(180deg, #9a7d4a 0%, #7d643b 100%);
+        }
+
+        /* --- Result Overlay (Modal) --- */
+        #result-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 100;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        #result-overlay.active {
+            display: flex;
+        }
+
+        #result-card {
+            background: #0a0d14;
+            border: 1px solid var(--color-border);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        #result-title {
+            font-size: 32px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(205, 160, 82, 0.7);
+        }
+        
+        #result-title.end-chapter { color: var(--color-success); }
+        #result-title.end-fail { color: var(--color-danger); }
+
+        #result-summary {
+            font-size: 17px;
+            line-height: 1.6;
+            color: var(--color-text-secondary);
+            margin-bottom: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 20px 0;
+        }
+
+        #next-chapter-btn {
+            width: 100%;
+        }
+
     </style>
 </head>
 <body>
 
-<div id="stage">
-    <div id="character-layer"></div>
+<div id="game-stage">
+    
+    <div id="character-art"></div>
 
-    <div id="hud">
-        <div class="stat-box">
-            <div class="stat-label">現值營收 / 支出</div>
-            <div id="cash-stat" class="stat-value">$125,000 / $80,000</div>
+    <div id="hud-top" class="ui-element">
+        <div class="hud-stat">
+            <span class="stat-label">目標現金流</span>
+            <span id="target-cash" class="stat-value">$200k / M</span>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">決策壓力</div>
-            <div id="stress-stat" class="stat-value">22%</div>
+        <div class="hud-stat">
+            <span class="stat-label">現值營收 / 支出</span>
+            <span id="current-pnl" class="stat-value">$125k / $80k</span>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">系統穩定度</div>
-            <div id="stable-stat" class="stat-value">92%</div>
+        <div class="hud-stat">
+            <span class="stat-label">決策壓力</span>
+            <span id="stress-level" class="stat-value">22%</span>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">剩餘資源</div>
-            <div id="intel-stat" class="stat-value">12 Units</div>
+        <div class="hud-stat">
+            <span class="stat-label">系統穩定度</span>
+            <span id="stability-level" class="stat-value">92%</span>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">月份</div>
-            <div id="month-stat" class="stat-value" style="color:white">M1</div>
+        <div id="current-month">M1</div>
+    </div>
+
+    <div id="event-card" class="ui-element">
+        <span class="chapter-title">CHAPTER 01: 現金流與生存</span>
+        <h2 id="event-title">首月的策略分岔點</h2>
+        <p id="event-desc">
+            市場反響不如預期，初期研發投入過高。帳面餘額僅夠支撐兩個月。你必須在「現金」與「價值」間做出抉擇。
+        </p>
+    </div>
+
+    <div id="dialogue-wrapper" class="ui-element">
+        <div id="speaker-icon"></div>
+        <div id="speaker-text">
+            <div id="speaker-name">導師 Marcus</div>
+            <div id="dialogue-content">「創始人的體力也是一種成本，別在無意義的磨合中耗盡它。先活下來。」</div>
         </div>
     </div>
 
-    <main id="main-ui">
-        <div id="event-card">
-            <span id="chapter-label" class="chapter-tag">CHAPTER 01: THE SURVIVAL GAP</span>
-            <h2 id="event-title" class="event-title">現金流斷裂危機</h2>
-            <p id="event-desc" class="event-desc">
-                初期研發投入過高，帳面餘額僅夠支撐兩個月。目前有三個方向可以調整。你打算如何分配下一階段的精力？
-            </p>
-        </div>
+    <div id="action-grid" class="ui-element">
+        <button class="action-btn" onclick="makeDecision(0)">
+            <span>接低價代工</span>
+        </button>
+        <button class="action-btn btn-priority" onclick="makeDecision(1)">
+            <span>打磨高單價產品</span>
+        </button>
+        <button class="action-btn" onclick="makeDecision(2)">
+            <span>暫停研發開支</span>
+        </button>
+    </div>
 
-        <div id="dialogue-wrapper">
-            <div id="speaker">顧問 Marcus</div>
-            <div id="text-content">「我們需要一口氣，不論是錢還是時間。在這個階段，活下去比美譽度更重要。」</div>
-        </div>
+</div>
 
-        <div id="action-grid">
-            <button class="btn-action" onclick="makeChoice(0)">
-                <span id="btn-0-title" class="btn-label">接低價短案</span>
-                <span class="btn-sub">快速補血 / 壓力增加</span>
-            </button>
-            <button class="btn-action" onclick="makeChoice(1)">
-                <span id="btn-1-title" class="btn-label">升級高價報價包</span>
-                <span class="btn-sub">品牌溢價 / 週期較長</span>
-            </button>
-            <button class="btn-action" onclick="makeChoice(2)">
-                <span id="btn-2-title" class="btn-label">縮減固定支出</span>
-                <span class="btn-sub">穩定度下降 / 換取時間</span>
-            </button>
+<div id="result-overlay">
+    <div id="result-card">
+        <div id="result-title">策略結果</div>
+        <div id="result-summary">
+            決策：打磨高單價產品 <br><br>
+            現金流變動: -10% <br>
+            壓力增長: +15% <br>
+            市場信心: +20% <br><br>
+            結果：你選擇了更長遠的道路，但現金流壓力劇增。團隊需要加班來趕進度。
         </div>
-    </main>
-
-    <div id="overlay">
-        <div id="report-card">
-            <h1 id="modal-title" class="report-header">決策回饋</h1>
-            <div id="modal-content">
-                </div>
-            <button class="report-btn" onclick="closeModal()">確認並執行下一步</button>
-        </div>
+        <button class="action-btn btn-priority" id="next-chapter-btn" onclick="advanceStep()">確認並推進 PROTOCOL</button>
     </div>
 </div>
 
 <script>
-    // --- Data Configuration ---
-    const chapters = [
+    // --- Game State & Logic ---
+
+    // Initial State (M1 start)
+    const gameState = {
+        month: 1,
+        targetCash: 200000,
+        currentRevenue: 125000,
+        currentExpense: 80000,
+        stress: 22,
+        stability: 92,
+        step: 0 // Current decision step
+    };
+
+    // Business Decision Script (3 Chapters)
+    const protocolSteps = [
+        // CHAPTER 1: 現金流
         {
-            month: "M1",
-            label: "CHAPTER 01: 現金流與生存",
-            title: "首月的策略分歧點",
-            desc: "市場反響不如預期，你必須在「現金」與「價值」間做出抉擇。團隊正在等待你的指示。",
-            speaker: "Marcus",
-            dialogue: "「記住，創始人的體力也是一種成本，別在沒意義的磨合中耗盡它。」",
+            monthLabel: "M1",
+            chapter: "01: 現金流與生存",
+            title: "首月的策略分岔點",
+            desc: "市場反響不如預期，研發投入過高。帳面餘額緊迫。你必須做出抉擇。",
+            advisorName: "導師 Marcus",
+            advisorQuote: "「創始人的體力也是一種成本。別在無意義的磨合中耗盡它。先活下來。」",
             options: [
-                { title: "接低價代工", sub: "補足短期現金", cash: 50000, stress: 15, stable: -5, msg: "獲得急救金，但你正陷入低價值勞動的陷阱。" },
-                { title: "磨合高單價產品", sub: "建立毛利護城河", cash: -20000, stress: 5, stable: 10, msg: "品牌力提升，但現金流變得非常緊繃。" },
-                { title: "暫停所有研發", sub: "砍掉固定支出", cash: 10000, stress: -10, stable: -20, msg: "壓力減輕，但你的產品研發進度已經停滯。" }
+                { label: "接低價代工", pnlRev: 50000, pnlExp: 10000, stress: 15, stability: -5, summary: "策略：接低價代工<br><br>營收獲得急救金(+$50k)，但你正陷入低價值勞動陷阱，壓力顯著上升。團隊士氣受挫。" },
+                { label: "打磨高單價產品", pnlRev: -20000, pnlExp: 5000, stress: 10, stability: 15, summary: "策略：打磨高單價產品<br><br>營收下降(-$20k)但市場信心建立(+$15%)。現金流變得非常緊繃。你選擇了長遠的道路。" },
+                { label: "暫停研發開支", pnlRev: 0, pnlExp: -25000, stress: -5, stability: -20, summary: "策略：暫停研發開支<br><br>支出大幅壓低(-$25k)換取時間，但系統穩定度暴跌(-$20%)。產品創新停滯，可能錯失市場窗口。" }
             ]
         },
+        // CHAPTER 2: 槓桿與規模
         {
-            month: "M2",
-            label: "CHAPTER 02: 規模化與槓桿",
+            monthLabel: "M2",
+            chapter: "02: 規模化與槓桿",
             title: "產能瓶頸出現",
-            desc: "訂單開始進來了，但你的時間被瑣事塞滿。你需要引進「槓桿」來解放生產力。",
-            speaker: "Marcus",
-            dialogue: "「你自己做確實最完美，但你打算一輩子只做這幾件嗎？」",
+            desc: "訂單開始進來了，但你的時間被瑣事塞滿。你需要引進「槓桿」來解放生產力，還是繼續單打獨鬥？",
+            advisorName: "CEO「老本」",
+            advisorQuote: "「你自己做確實最完美，但你打算一輩子只做這幾件嗎？學會外包信任。」",
             options: [
-                { title: "啟動 AI 流程", sub: "自動化工作流", cash: -30000, stress: -5, stable: 25, msg: "生產力大幅釋放，系統穩定度顯著上升。" },
-                { title: "外包部分產能", sub: "購買他人時間", cash: -15000, stress: -10, stable: 5, msg: "你換取了決策空間，但成本結構開始變重。" },
-                { title: "維持單人模式", sub: "極致利潤化", cash: 40000, stress: 30, stable: -10, msg: "利潤極高，但你的心理健康值已瀕臨臨界點。" }
+                { label: "啟動 AI 流程", pnlRev: 20000, pnlExp: 15000, stress: -10, stability: 25, summary: "策略：啟動 AI 流程<br><br>前期投入(+$15k支出)建立流程自動化。生產力釋放，壓力下降(-$10%)，系統穩定度飆升(+$25%)。這是一筆成功的投資。" },
+                { label: "外包部分產能", pnlRev: 10000, pnlExp: 20000, stress: -5, stability: 10, summary: "策略=外包產能<br><br>營收增長但成本上升(+$20k支出)，換取了決策空間。你開始像個管理者了。" },
+                { label: "建立 SOP 硬扛", pnlRev: 30000, pnlExp: 5000, stress: 20, stability: -10, summary: "策略：建立 SOP 硬扛<br><br>你選擇最辛苦的路。雖然短期利潤最高，但你的心理健康(+$20%壓力)已瀕臨極限。團隊開始抱怨。" }
             ]
         },
+        // CHAPTER 3: 終局與模式
         {
-            month: "M3",
-            label: "CHAPTER 03: 商業終局之戰",
+            monthLabel: "M3",
+            chapter: "03: 商業終局之戰",
             title: "品牌 vs 通路",
-            desc: "產品成熟了。現在要決定是深耕自有品牌，還是快速鋪設通路擴大規模？",
-            speaker: "Marcus",
-            dialogue: "「這是最後一跳。要當隱形冠軍，還是要成為市場焦點？」",
+            desc: "產品成熟，營收穩定。現在要決定是深耕自有品牌獲取溢價，還是快速鋪設通路擴大規模？這決定了你的商業估值。",
+            advisorName: "導師 Marcus",
+            advisorQuote: "「這是最後一跳。要當隱形冠軍，還是要成為市場焦點？這決定了你如何脫身。」",
             options: [
-                { title: "重金砸品牌", sub: "長期溢價策略", cash: -60000, stress: 20, stable: 15, msg: "你贏得了市場尊重，未來擁有極強的報價權。" },
-                { title: "主攻通路分潤", sub: "換取市佔率", cash: 80000, stress: 5, stable: -5, msg: "現金爆發，你成功建立了一台賺錢機器。" },
-                { title: "建立 SOP 授權", sub: "商業模式輕量化", cash: 30000, stress: -15, stable: 30, msg: "你成功脫離了勞動，轉向資本與智力授權模式。" }
+                { label: "重金砸品牌", pnlRev: -50000, pnlExp: 40000, stress: 25, stability: 15, summary: "策略：重金砸品牌<br><br>選擇高風險溢價模式。短期營收暴跌支出暴漲。你贏得了尊重，但未來充滿不確定性。壓力劇增。" },
+                { label: "主攻通路分潤", pnlRev: 90000, pnlExp: 10000, stress: 5, stability: -5, summary: "策略：通路分潤<br><br>選擇快速擴張模式。營收爆發(+$90k)，換取市佔率。系統穩定度略降。你建立了一台賺錢機器。" },
+                { label: "授權 SOP 輕量化", pnlRev: 40000, pnlExp: -10000, stress: -15, stability: 30, summary: "策略：授權輕量化<br><br>最成熟的模式。你選擇將智力資產授權出去。營收穩步上升壓力下降(-$15%)，系統極度穩定。你成功脫離了勞動。" }
             ]
         }
     ];
 
-    // --- State Manager ---
-    let currentStep = 0;
-    let stats = {
-        cash: 125000,
-        stress: 22,
-        stable: 92,
-        intel: 12
+    // Final Report based on results
+    const resultsScript = {
+        success: { title: "協議達成", class: "end-chapter", summary: "季度經營結算：S+ (卓越企業家)<br><br>資產總額：$245,000 / $80,000 <br>決策壓力：12% <br>系統穩定度：98% <br><br>評價：你成功建立了可規模化的商業體。創始人已脫離勞動，公司正邁向高估值。你是一位真正的戰略家。" },
+        qualified: { title: "任務合格", class: "", summary: "季度經營結算：A (穩定經營者)<br><br>資產總額：$185,000 / $75,000 <br>決策壓力：28% <br>系統穩定度：85% <br><br>評價：公司雖然存活且盈利，但仍依賴你的決策。未來需要更注重流程化，釋放你個人的時間。" },
+        failed: { title: "商業崩潰", class: "end-fail", summary: "季度經營結算：C- (生存邊緣人)<br><br>資產總額：$110,000 / $105,000 <br>決策壓力：65% <br>系統穩定度：52% <br><br>評價：公司正處於崩潰邊緣。你的現金流即將枯竭，創始人壓力過大。雖然完成了部分目標，但商業模式已無法持續。重新思考你的價值主張。" }
     };
 
-    function updateUI() {
-        // Stats
-        document.getElementById('cash-stat').innerText = `$${stats.cash.toLocaleString()} / $80,000`;
-        document.getElementById('stress-stat').innerText = `${stats.stress}%`;
-        document.getElementById('stable-stat').innerText = `${stats.stable}%`;
-        document.getElementById('month-stat').innerText = chapters[currentStep]?.month || "END";
+    // --- UI Update Functions ---
 
-        // Stress visual warning
-        document.getElementById('stress-stat').className = stats.stress > 60 ? 'stat-value danger' : 'stat-value';
+    function updateHUD() {
+        document.getElementById('current-month').innerText = protocolSteps[gameState.step]?.monthLabel || "END";
+        document.getElementById('target-cash').innerText = `$${(gameState.targetCash / 1000)}k / M`;
+        document.getElementById('current-pnl').innerText = `$${(gameState.currentRevenue / 1000)}k / $${(gameState.currentExpense / 1000)}k`;
+        document.getElementById('stress-level').innerText = `${gameState.stress}%`;
+        document.getElementById('stability-level').innerText = `${gameState.stability}%`;
 
-        // Content
-        if (currentStep < chapters.length) {
-            const data = chapters[currentStep];
-            document.getElementById('chapter-label').innerText = data.label;
-            document.getElementById('event-title').innerText = data.title;
-            document.getElementById('event-desc').innerText = data.desc;
-            document.getElementById('speaker').innerText = `顧問 ${data.speaker}`;
-            document.getElementById('text-content').innerText = data.dialogue;
-
-            // Buttons
-            for (let i = 0; i < 3; i++) {
-                document.getElementById(`btn-${i}-title`).innerText = data.options[i].title;
-                document.querySelector(`#action-grid button:nth-child(${i+1}) .btn-sub`).innerText = data.options[i].sub;
-            }
-        }
+        // Apply critical color states
+        if (gameState.stress > 60) document.getElementById('stress-level').style.color = 'var(--color-danger)';
+        else document.getElementById('stress-level').style.color = 'var(--color-accent)';
+        
+        if (gameState.stability < 40) document.getElementById('stability-level').style.color = 'var(--color-danger)';
+        else document.getElementById('stability-level').style.color = 'var(--color-accent)';
     }
 
-    function makeChoice(idx) {
-        const option = chapters[currentStep].options[idx];
-        
-        // Apply Changes
-        stats.cash += option.cash;
-        stats.stress += option.stress;
-        stats.stable += option.stable;
-
-        // Show Modal
-        const modal = document.getElementById('overlay');
-        const content = document.getElementById('modal-content');
-        content.innerHTML = `
-            <p style="margin-bottom:20px; line-height:1.6;">${option.msg}</p>
-            <div class="report-stat"><span>現金流變動</span><span style="color:${option.cash > 0 ? 'var(--success)' : 'var(--danger)'}">${option.cash > 0 ? '+' : ''}${option.cash}</span></div>
-            <div class="report-stat"><span>壓力增減</span><span style="color:var(--gold)">${option.stress > 0 ? '+' : ''}${option.stress}%</span></div>
-            <div class="report-stat"><span>穩定度影響</span><span style="color:var(--success)">${option.stable > 0 ? '+' : ''}${option.stable}%</span></div>
-        `;
-        modal.style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('overlay').style.display = 'none';
-        currentStep++;
-        
-        if (currentStep >= chapters.length) {
+    function updateGameContent() {
+        if (gameState.step >= protocolSteps.length) {
             showFinalReport();
-        } else {
-            updateUI();
+            return;
         }
+
+        const currentStep = protocolSteps[gameState.step];
+        
+        // Update Event Card
+        document.querySelector('#event-card .chapter-title').innerText = `CHAPTER ${currentStep.chapter}`;
+        document.getElementById('event-title').innerText = currentStep.title;
+        document.getElementById('event-desc').innerText = currentStep.desc;
+
+        // Update Advisor Dialogue (instant, no typing animation for premium look)
+        document.getElementById('speaker-name').innerText = currentStep.advisorName;
+        document.getElementById('dialogue-content').innerText = currentStep.advisorQuote;
+
+        // Update Buttons
+        const buttons = document.querySelectorAll('#action-grid .action-btn span');
+        buttons[0].innerText = currentStep.options[0].label;
+        buttons[1].innerText = currentStep.options[1].label;
+        buttons[2].innerText = currentStep.options[2].label;
+    }
+
+    // --- Interaction & Game flow ---
+
+    function makeDecision(optionIndex) {
+        if (gameState.step >= protocolSteps.length) return;
+
+        const currentProtocol = protocolSteps[gameState.step];
+        const choice = currentProtocol.options[optionIndex];
+
+        // Apply State Changes
+        gameState.currentRevenue += choice.pnlRev;
+        gameState.currentExpense += choice.pnlExp;
+        gameState.stress += choice.stress;
+        gameState.stability += choice.stability;
+
+        // State Clamping
+        gameState.stress = Math.max(0, Math.min(100, gameState.stress));
+        gameState.stability = Math.max(0, Math.min(100, gameState.stability));
+
+        // CHARACTER/Advisor immediate reaction (changes the quote instantly)
+        document.getElementById('dialogue-content').innerText = "「做得好。你已做出選擇。PROTOCOL 正在計算數據...」";
+        document.getElementById('speaker-name').innerText = "PROTOCOL 核心";
+
+        // Show Result Modal
+        const overlay = document.getElementById('result-overlay');
+        const summaryText = document.getElementById('result-summary');
+        const titleText = document.getElementById('result-title');
+        titleText.innerText = "策略 Protocol";
+        titleText.className = ""; // Reset class
+
+        summaryText.innerHTML = choice.summary;
+        overlay.classList.add('active');
+
+        // Block UI clicks until advanceStep is called
+        document.getElementById('action-grid').style.pointerEvents = 'none';
+        updateHUD();
+    }
+
+    function advanceStep() {
+        const overlay = document.getElementById('result-overlay');
+        overlay.classList.remove('active');
+        document.getElementById('action-grid').style.pointerEvents = 'auto'; // Re-enable UI
+
+        // Advance to next chapter
+        gameState.step++;
+        updateGameContent();
+        // updateHUD(); // HUD already updated in makeDecision
     }
 
     function showFinalReport() {
-        const modal = document.getElementById('overlay');
-        const title = document.getElementById('modal-title');
-        const content = document.getElementById('modal-content');
+        const overlay = document.getElementById('result-overlay');
+        const titleText = document.getElementById('result-title');
+        const summaryText = document.getElementById('result-summary');
+        const actionBtn = document.getElementById('next-chapter-btn');
+
+        // Determine Final Outcome based on simple logic
+        let report;
+        if (gameState.currentRevenue > 200000 && gameState.stability > 70 && gameState.stress < 40) {
+            report = resultsScript.success;
+        } else if (gameState.currentRevenue > gameState.currentExpense && gameState.stability > 50) {
+            report = resultsScript.qualified;
+        } else {
+            report = resultsScript.failed;
+        }
+
+        titleText.innerText = report.title;
+        titleText.className = report.class;
+        summaryText.innerHTML = report.summary;
         
-        title.innerText = "季度經營結算";
-        let rating = stats.cash > 200000 ? "S+ 卓越企業家" : (stats.cash > 100000 ? "A 穩定經營者" : "C 生存邊緣人");
-        
-        content.innerHTML = `
-            <h2 style="color:white; margin-bottom:20px;">${rating}</h2>
-            <div class="report-stat"><span>最終資產</span><span style="color:var(--gold)">$${stats.cash.toLocaleString()}</span></div>
-            <div class="report-stat"><span>身心磨損</span><span>${stats.stress}%</span></div>
-            <div class="report-stat"><span>架構完整性</span><span>${stats.stable}%</span></div>
-            <p style="margin-top:20px; font-size:12px; color:var(--text-dim)">你在本季度的決策決定了下一輪融資的起點。</p>
-        `;
-        
-        const btn = document.querySelector('.report-btn');
-        btn.innerText = "重新開始模擬";
-        btn.onclick = () => location.reload();
-        modal.style.display = 'flex';
+        // Final action: Restart simulation
+        actionBtn.innerText = "重新執行模擬 PROTOCOL";
+        actionBtn.onclick = resetSimulation;
+
+        overlay.classList.add('active');
     }
 
-    // Init
-    updateUI();
-</script>
+    function resetSimulation() {
+        // Full Reset
+        gameState.month = 1;
+        gameState.targetCash = 200000;
+        gameState.currentRevenue = 125000;
+        gameState.currentExpense = 80000;
+        gameState.stress = 22;
+        gameState.stability = 92;
+        gameState.step = 0;
 
+        const overlay = document.getElementById('result-overlay');
+        overlay.classList.remove('active');
+        
+        // Reset final report button back to default
+        const actionBtn = document.getElementById('next-chapter-btn');
+        actionBtn.innerText = "確認並推進 PROTOCOL";
+        actionBtn.onclick = advanceStep;
+
+        updateHUD();
+        updateGameContent();
+    }
+
+    // --- Initialization ---
+    // Start simulation loop
+    updateHUD();
+    updateGameContent();
+
+</script>
 </body>
 </html>
