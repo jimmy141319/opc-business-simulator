@@ -1,660 +1,925 @@
 <!DOCTYPE html>
-
-<html lang="zh-TW">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>OPC 商業決策模擬器</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-<style>
-:root{
-  --gold:#e8b84b;--gold2:#f5d47a;--gold3:#c8882a;--gold4:#fff0b0;
-  --red:#ff4444;--teal:#4be8c8;--blue:#4b8ce8;--green:#4be88c;
-  --dark:#04060c;--dark2:#080d18;--dark3:#0e1525;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);
-  font-family:'Rajdhani','Noto Serif TC',sans-serif;color:#dde;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FOUNDER OPERATIVE - Business Strategy Simulator</title>
+    <style>
+        /* CSS Reset & Variable Definitions */
+        :root {
+            --bg-color: #05080a;
+            --main-accent: #00f2ff;
+            --main-accent-dim: #007780;
+            --text-color: #d0e0e3;
+            --panel-bg: rgba(10, 20, 30, 0.85);
+            --panel-border: rgba(0, 242, 255, 0.4);
+            --positive-value: #33ff33;
+            --negative-value: #ff3333;
+            --font-stack: 'Rajdhani', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-#bg{position:fixed;inset:0;z-index:0;overflow:hidden;
-background:radial-gradient(ellipse 90% 70% at 60% 30%,rgba(15,35,100,.55) 0%,transparent 65%),
-radial-gradient(ellipse 60% 80% at 10% 90%,rgba(80,15,15,.4) 0%,transparent 55%),
-linear-gradient(160deg,#02040a 0%,#080f1c 50%,#05080f 100%);}
-#bg::before{content:’’;position:absolute;inset:0;
-background-image:repeating-linear-gradient(0deg,transparent,transparent 47px,rgba(232,184,75,.025) 48px),
-repeating-linear-gradient(90deg,transparent,transparent 47px,rgba(232,184,75,.025) 48px);}
-.orb{position:absolute;border-radius:50%;filter:blur(60px);animation:odrift ease-in-out infinite;}
-@keyframes odrift{0%,100%{transform:translate(0,0);}50%{transform:translate(var(–dx),var(–dy));}}
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
-#app{position:relative;z-index:1;width:100%;height:100vh;max-width:430px;margin:0 auto;
-display:flex;flex-direction:column;overflow:hidden;}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: var(--font-stack);
+        }
 
-/* TOP BAR */
-#topbar{flex-shrink:0;
-background:linear-gradient(180deg,rgba(2,4,10,.99),rgba(6,10,20,.97));
-border-bottom:1px solid rgba(232,184,75,.15);padding:5px 10px 0;}
-#topbar::after{content:’’;display:block;height:1px;
-background:linear-gradient(90deg,transparent,var(–gold) 20%,var(–gold2) 50%,var(–gold) 80%,transparent);}
-.tb1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.logo{font-family:‘Orbitron’;font-weight:900;font-size:10px;letter-spacing:2px;
-background:linear-gradient(135deg,var(–gold4),var(–gold),var(–gold3));
--webkit-background-clip:text;-webkit-text-fill-color:transparent;
-filter:drop-shadow(0 0 8px rgba(232,184,75,.5));}
-.chap-pill{font-size:8px;color:#778;background:rgba(255,255,255,.04);
-border:1px solid rgba(255,255,255,.08);padding:1px 7px;border-radius:8px;}
-.mbadge{display:flex;align-items:center;gap:4px;font-size:9px;color:var(–gold);
-background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.3);
-padding:2px 8px;border-radius:10px;animation:pgold 2.5s infinite;}
-@keyframes pgold{0%,100%{box-shadow:0 0 4px rgba(232,184,75,.15);}50%{box-shadow:0 0 14px rgba(232,184,75,.5);}}
-.mdot{width:5px;height:5px;border-radius:50%;background:var(–gold);animation:blink 2s infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            font-weight: 500;
+        }
 
-.tb-player{display:flex;align-items:center;gap:6px;padding:3px 0 4px;}
-.pav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#1a2a44,#2a3a5a);
-border:1.5px solid var(–gold);display:flex;align-items:center;justify-content:center;font-size:13px;
-box-shadow:0 0 10px rgba(232,184,75,.3);flex-shrink:0;}
-.pinfo{flex:1;min-width:0;}
-.pname{font-size:10px;font-weight:700;color:#ccd;letter-spacing:.5px;}
-.plv{display:flex;align-items:center;gap:5px;}
-.lvb{font-size:8px;font-weight:700;color:var(–gold3);background:rgba(232,184,75,.15);
-border:1px solid rgba(232,184,75,.3);padding:0 5px;border-radius:3px;}
-.expw{flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;}
-.expf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(–gold3),var(–gold2));transition:width .8s ease;}
-.expt{font-size:7.5px;color:#556;}
-.coinw{display:flex;align-items:center;gap:3px;background:rgba(232,184,75,.08);
-border:1px solid rgba(232,184,75,.2);padding:2px 7px;border-radius:8px;}
-.coinv{font-size:10px;font-weight:700;color:var(–gold2);}
+        /* 16:9 Aspect Ratio Container for Desktop/Web Preview */
+        .stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 177.78vh; /* 16:9 */
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 56.25vw; /* 16:9 */
+            transform: translate(-50%, -50%);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2305080a"/><g opacity="0.1"><circle cx="20" cy="20" r="1" fill="%2300f2ff"/><circle cx="80" cy="20" r="1" fill="%2300f2ff"/><circle cx="50" cy="50" r="1" fill="%2300f2ff"/><circle cx="20" cy="80" r="1" fill="%2300f2ff"/><circle cx="80" cy="80" r="1" fill="%2300f2ff"/></g></svg>');
+            background-size: cover;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
 
-/* HUD */
-#hud{flex-shrink:0;padding:5px 8px 4px;background:rgba(6,10,20,.6);}
-.hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
-.hc{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);
-border-radius:7px;padding:4px 6px;position:relative;overflow:hidden;}
-.hc::before{content:’’;position:absolute;top:0;left:0;right:0;height:1px;
-background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);}
-.hc.flash{animation:hflash .4s ease;}
-@keyframes hflash{50%{background:rgba(232,184,75,.12);}}
-.hl{font-size:7px;color:#4a5566;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
-.hv{font-size:11px;font-weight:700;line-height:1.2;white-space:nowrap;}
-.hb{height:2px;border-radius:1px;margin-top:2px;background:rgba(255,255,255,.06);overflow:hidden;}
-.hbf{height:100%;border-radius:1px;transition:width .7s cubic-bezier(.4,0,.2,1);}
-.hc-ca .hv{color:var(–gold);} .hc-ca .hbf{background:linear-gradient(90deg,var(–gold3),var(–gold2));}
-.hc-rv .hv{color:var(–green);} .hc-rv .hbf{background:linear-gradient(90deg,#28a060,var(–green));}
-.hc-st .hv{color:var(–red);}  .hc-st .hbf{background:linear-gradient(90deg,#aa1818,var(–red));}
-.hc-sb .hv{color:var(–teal);} .hc-sb .hbf{background:linear-gradient(90deg,#22a890,var(–teal));}
+        /* Scanline Overlay for visual depth */
+        .stage::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.3;
+        }
 
-/* MID */
-#mid{flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden;min-height:0;}
+        /* --- 1. TOP HUD (Match Reference Structure) --- */
+        .hud-top {
+            position: absolute;
+            top: 1vh;
+            left: 1vw;
+            right: 1vw;
+            height: 8vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
 
-/* CHARACTER */
-#cw{position:absolute;bottom:0;left:-12px;z-index:2;width:200px;height:96%;pointer-events:none;}
-#cw::after{content:’’;position:absolute;bottom:0;left:0;right:0;height:28%;
-background:linear-gradient(0deg,rgba(6,10,20,.9) 0%,transparent 100%);}
-#cw svg{width:100%;height:100%;overflow:visible;
-filter:drop-shadow(8px 0 30px rgba(60,120,255,.22)) drop-shadow(-2px 0 12px rgba(0,0,0,.95));
-animation:cbreathe 4s ease-in-out infinite;}
-@keyframes cbreathe{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
-.caura{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);
-width:160px;height:160px;border-radius:50%;pointer-events:none;
-background:radial-gradient(ellipse,rgba(75,140,232,.12) 0%,transparent 70%);
-animation:apulse 3s ease-in-out infinite;}
-@keyframes apulse{0%,100%{transform:translateX(-50%) scale(1);opacity:.7;}
-50%{transform:translateX(-50%) scale(1.15);opacity:1;}}
+        .hud-left, .hud-right {
+            display: flex;
+            gap: 1.5vw;
+            align-items: center;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 0.5vh 1.5vw;
+            border-radius: 4px;
+        }
 
-/* EVENT PANEL */
-#ep{position:absolute;right:8px;top:7px;width:calc(100% - 170px);z-index:3;}
-.ephdr{display:flex;align-items:center;gap:5px;margin-bottom:5px;}
-.ebadge{font-size:7.5px;font-weight:700;letter-spacing:1.5px;color:#fff;
-padding:2px 8px;border-radius:3px;text-transform:uppercase;animation:bpulse 3s infinite;}
-@keyframes bpulse{0%,80%,100%{opacity:1;}88%,96%{opacity:.4;}}
-.ebadge.crisis{background:linear-gradient(135deg,#8a2020,#c03030);
-border:1px solid rgba(255,80,80,.5);box-shadow:0 0 12px rgba(200,40,40,.4);}
-.ebadge.oppty{background:linear-gradient(135deg,#206020,#30a030);
-border:1px solid rgba(80,200,80,.5);box-shadow:0 0 12px rgba(40,180,40,.4);}
-.ebadge.alert{background:linear-gradient(135deg,#806010,#c09020);
-border:1px solid rgba(220,180,40,.5);box-shadow:0 0 12px rgba(200,160,30,.4);}
-.estars{display:flex;gap:2px;}
-.estr{font-size:10px;animation:stwinkle 2s infinite;}
-.estr:nth-child(2){animation-delay:.3s;}.estr:nth-child(3){animation-delay:.6s;}
-.estr:nth-child(4){animation-delay:.9s;}.estr:nth-child(5){animation-delay:1.2s;}
-@keyframes stwinkle{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+        .logo-area {
+            font-size: 2.5vh;
+            font-weight: 700;
+            color: var(--main-accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
 
-.ecard{background:linear-gradient(148deg,rgba(10,16,32,.99),rgba(16,24,46,.98));
-border:1px solid rgba(232,184,75,.2);border-radius:11px;padding:9px 11px 8px;
-position:relative;overflow:hidden;
-box-shadow:0 8px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);}
-.ecard::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;
-background:linear-gradient(90deg,transparent,var(–gold) 20%,var(–gold2) 55%,var(–gold) 80%,transparent);}
-.ecard::after{content:’’;position:absolute;top:0;right:0;bottom:0;width:2px;
-background:linear-gradient(180deg,var(–gold),transparent 60%);}
-.shimmer{position:absolute;top:0;left:-80px;bottom:0;width:60px;pointer-events:none;
-background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);
-animation:shimmer 5s infinite 2s;}
-@keyframes shimmer{0%{left:-80px}100%{left:115%}}
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.etags{display:flex;gap:3px;margin-bottom:5px;flex-wrap:wrap;}
-.etag{font-size:7px;padding:1px 6px;border-radius:3px;font-weight:700;letter-spacing:.5px;}
-.tc{background:rgba(220,50,50,.18);border:1px solid rgba(220,50,50,.4);color:#ff8888;}
-.tu{background:rgba(232,140,30,.18);border:1px solid rgba(232,140,30,.4);color:#ffaa55;}
-.tf{background:rgba(75,140,232,.18);border:1px solid rgba(75,140,232,.4);color:#80c0ff;}
-.to{background:rgba(75,200,100,.18);border:1px solid rgba(75,200,100,.4);color:#80ee99;}
-.th{background:rgba(180,75,232,.18);border:1px solid rgba(180,75,232,.4);color:#d0a0ff;}
+        .hud-label {
+            font-size: 1.2vh;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.05em;
+        }
 
-.etitle{font-family:‘Noto Serif TC’;font-weight:700;font-size:12.5px;color:#f0e8d0;line-height:1.35;margin-bottom:5px;}
-.edesc{font-size:9.5px;color:#6a7a9a;line-height:1.6;border-left:2px solid rgba(232,184,75,.25);padding-left:7px;}
-.eimps{margin-top:7px;display:grid;grid-template-columns:1fr 1fr;gap:3px;}
-.imp{display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.025);
-border-radius:4px;padding:3px 5px;border:1px solid rgba(255,255,255,.05);}
-.ii{font-size:9px;}.it{font-size:8px;color:#8899bb;}.iv{font-size:8.5px;font-weight:700;margin-left:auto;}
-.neg{color:var(–red);}.pos{color:var(–green);}
+        .hud-value {
+            font-size: 2vh;
+            font-weight: 600;
+        }
 
-/* ADVISOR */
-#az{flex-shrink:0;padding:0 8px 4px;}
-.abox{background:linear-gradient(148deg,rgba(6,12,26,.99),rgba(12,18,36,.98));
-border:1px solid rgba(75,200,232,.2);border-radius:10px;padding:7px 10px;
-position:relative;overflow:hidden;
-box-shadow:0 0 28px rgba(75,200,232,.06),0 4px 16px rgba(0,0,0,.5);}
-.abox::before{content:’’;position:absolute;top:0;left:0;right:0;height:1px;
-background:linear-gradient(90deg,transparent,var(–teal) 35%,transparent);}
-.abox::after{content:’’;position:absolute;top:0;left:0;bottom:0;width:2px;
-background:linear-gradient(180deg,var(–teal),transparent 65%);}
-.ahdr{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
-.aav{width:28px;height:28px;border-radius:50%;flex-shrink:0;
-background:linear-gradient(135deg,#102030,#1c3445);border:1.5px solid var(–teal);
-display:flex;align-items:center;justify-content:center;font-size:14px;
-box-shadow:0 0 14px rgba(75,200,232,.35);}
-.anm{font-size:10.5px;font-weight:700;color:var(–teal);letter-spacing:.5px;}
-.arl{font-size:7px;color:#445566;letter-spacing:.5px;}
-.ast{display:flex;align-items:center;gap:3px;font-size:7.5px;color:#4ec;
-background:rgba(75,200,232,.08);border:1px solid rgba(75,200,232,.2);border-radius:8px;padding:1px 7px;}
-.adot{width:5px;height:5px;border-radius:50%;background:var(–teal);animation:blink 1.8s infinite;}
-.atxt{font-size:10.5px;color:#8899bb;line-height:1.65;padding-left:35px;position:relative;}
-.atxt::before{content:’”’;position:absolute;left:2px;top:-5px;font-size:28px;
-color:rgba(75,200,232,.15);font-family:Georgia;line-height:1;}
-#acur{display:inline-block;width:6px;height:10px;background:var(–teal);
-margin-left:1px;vertical-align:middle;animation:cur .9s infinite;}
-@keyframes cur{0%,100%{opacity:1;}50%{opacity:0;}}
+        .value-money { color: var(--positive-value); }
+        .value-danger { color: var(--negative-value); }
 
-/* ACTIONS */
-#actions{flex-shrink:0;padding:0 8px 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-.abt{position:relative;overflow:hidden;border:none;cursor:pointer;border-radius:11px;
-padding:10px 5px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;
-transition:transform .12s cubic-bezier(.2,1.5,.4,1);-webkit-appearance:none;}
-.abt:active{transform:scale(.88);}
-.abt::before{content:’’;position:absolute;top:0;left:0;right:0;height:1px;
-background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);}
-.abt-a{background:linear-gradient(155deg,#1a3060,#0c1c3c);border:1px solid rgba(75,140,232,.5);
-box-shadow:0 5px 20px rgba(20,50,130,.45);}
-.abt-b{background:linear-gradient(155deg,#3c1e0c,#261008);border:1px solid rgba(232,140,50,.5);
-box-shadow:0 5px 20px rgba(110,55,15,.45);}
-.abt-c{background:linear-gradient(155deg,#0e3428,#082218);border:1px solid rgba(50,200,130,.5);
-box-shadow:0 5px 20px rgba(18,90,55,.45);}
-.acorn{position:absolute;top:4px;right:4px;font-size:6.5px;padding:1px 4px;border-radius:3px;font-weight:700;}
-.abt-a .acorn{background:rgba(75,140,232,.22);color:#80c0ff;border:1px solid rgba(75,140,232,.3);}
-.abt-b .acorn{background:rgba(232,140,50,.22);color:#ffb060;border:1px solid rgba(232,140,50,.3);}
-.abt-c .acorn{background:rgba(50,200,130,.22);color:#60e898;border:1px solid rgba(50,200,130,.3);}
-.aico{font-size:22px;line-height:1;}
-.albl{font-family:‘Noto Serif TC’;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-align:center;line-height:1.25;}
-.abt-a .albl{color:#90c0ff;}.abt-b .albl{color:#ffc080;}.abt-c .albl{color:#60e898;}
-.asub{font-size:7.5px;color:#445566;text-align:center;}
-.ndot{position:absolute;top:5px;left:7px;width:9px;height:9px;border-radius:50%;
-background:var(–red);border:1.5px solid var(–dark);box-shadow:0 0 8px rgba(255,68,68,.7);
-animation:npulse 1.2s infinite;}
-@keyframes npulse{0%,100%{transform:scale(1);}50%{transform:scale(1.4);}}
+        .time-display {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
 
-/* OVERLAY */
-#ov{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.9);
-align-items:center;justify-content:center;backdrop-filter:blur(8px);}
-#ov.show{display:flex;animation:fdin .3s;}
-@keyframes fdin{from{opacity:0;}to{opacity:1;}}
-.rcard{background:linear-gradient(155deg,#0a1220,#141e35);border:1px solid var(–gold);
-border-radius:18px;padding:20px 18px 18px;max-width:310px;width:92%;text-align:center;
-position:relative;overflow:hidden;
-box-shadow:0 0 60px rgba(232,184,75,.18),0 16px 48px rgba(0,0,0,.7);
-animation:cdin .4s cubic-bezier(.2,1.5,.4,1);}
-@keyframes cdin{from{transform:scale(.7) translateY(30px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-.rcard::before{content:’’;position:absolute;top:0;left:15%;right:15%;height:2px;
-background:linear-gradient(90deg,transparent,var(–gold),transparent);}
-.rico{font-size:52px;margin-bottom:6px;display:block;
-animation:icop .5s cubic-bezier(.2,2,.4,1) .1s both;}
-@keyframes icop{from{transform:scale(0) rotate(-20deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
-.rgrd{font-family:‘Orbitron’;font-size:13px;font-weight:900;letter-spacing:3px;margin-bottom:5px;}
-.gs{color:#fff0a0;text-shadow:0 0 20px rgba(255,220,80,.6);}
-.ga{color:#80e8a0;text-shadow:0 0 20px rgba(80,220,120,.5);}
-.gb{color:#80c0ff;text-shadow:0 0 20px rgba(80,160,255,.5);}
-.gc{color:#ffb060;text-shadow:0 0 20px rgba(255,160,60,.5);}
-.rtit{font-family:‘Noto Serif TC’;font-size:16px;font-weight:900;color:var(–gold2);margin-bottom:7px;}
-.rdesc{font-size:11px;color:#6a7a9a;line-height:1.65;margin-bottom:14px;}
-.rchips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:12px;}
-.chip{font-size:9.5px;padding:3px 10px;border-radius:10px;font-weight:700;}
-.cp{background:rgba(80,200,120,.14);border:1px solid rgba(80,200,120,.38);color:#80e8a0;}
-.cn{background:rgba(220,80,80,.14);border:1px solid rgba(220,80,80,.38);color:#ff9090;}
-.rexp{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:8px;
-background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.2);border-radius:8px;}
-.expgn{font-size:13px;font-weight:700;color:var(–gold2);}
-.expbr{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
-.expfr{height:100%;background:linear-gradient(90deg,var(–gold3),var(–gold2));transition:width 1s .3s ease;}
-.rbtn{background:linear-gradient(135deg,var(–gold3),var(–gold),var(–gold3));border:none;
-border-radius:9px;padding:12px 36px;font-family:‘Noto Serif TC’;font-size:13px;font-weight:700;
-color:#04060c;cursor:pointer;letter-spacing:1.5px;box-shadow:0 4px 20px rgba(232,184,75,.35);
-transition:transform .1s;}
-.rbtn:active{transform:scale(.95);}
+        .current-month {
+            font-size: 2vh;
+            font-weight: 700;
+            color: var(--main-accent);
+        }
 
-/* TOAST */
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
-z-index:400;transition:transform .4s cubic-bezier(.2,1.5,.4,1);}
-#toast.show{transform:translateX(-50%) translateY(0);}
-.tinn{background:linear-gradient(135deg,#1a2840,#242e4a);border:1px solid var(–gold);
-border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:8px;
-box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(232,184,75,.2);}
-.tico{font-size:20px;}
-.ttit{font-size:10px;font-weight:700;color:var(–gold2);}
-.tsub{font-size:8.5px;color:#778899;}
+        .next-event {
+            font-size: 1.2vh;
+            color: var(--text-color);
+        }
 
-/* COMBO */
-#combo{position:absolute;right:12px;bottom:52%;z-index:10;pointer-events:none;
-opacity:0;transform:scale(.5);transition:opacity .3s,transform .3s;}
-#combo.show{opacity:1;transform:scale(1);}
-.cnum{font-family:‘Orbitron’;font-size:28px;font-weight:900;
-background:linear-gradient(135deg,var(–gold2),var(–gold));
--webkit-background-clip:text;-webkit-text-fill-color:transparent;
-filter:drop-shadow(0 0 10px rgba(232,184,75,.5));text-align:center;}
-.ctxt{font-size:9px;color:var(–gold);letter-spacing:2px;text-align:center;}
+        /* --- 2. LEFT SQUAD COLUMN (Match Quality Level) --- */
+        .squad-column {
+            position: absolute;
+            top: 10vh;
+            left: 1vw;
+            width: 10vw;
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+            z-index: 90;
+        }
 
-/* BURST */
-.bpar{position:fixed;border-radius:50%;pointer-events:none;z-index:500;animation:bst linear forwards;}
-@keyframes bst{0%{opacity:1;transform:translate(0,0) scale(1);}
-100%{opacity:0;transform:translate(var(–bx),var(–by)) scale(0);}}
-/* FLOAT */
-.fpar{position:absolute;border-radius:50%;pointer-events:none;animation:flt linear infinite;}
-@keyframes flt{0%{transform:translateY(0) translateX(0);opacity:0;}
-10%{opacity:.6;}90%{opacity:.1;}100%{transform:translateY(-110vh) translateX(var(–dx));opacity:0;}}
-</style>
+        .squad-title {
+            font-size: 1.4vh;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 0.5vh;
+        }
 
+        .squad-member {
+            width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .squad-member:hover, .squad-member.selected {
+            background-color: rgba(0, 242, 255, 0.15);
+        }
+
+        .squad-portrait-container {
+            width: 100%;
+            padding-bottom: 133%; /* 3:4 portrait ratio */
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        /* Squad Portaits: Premium, matching the overall art style. 
+           (In production, these would be separate image files.) */
+        .portrait-fin { background-image: url('https://replicate.delivery/pbxt/HlY7R23Gq9K29q6p9s8w8b8F8T8K8U8X8R8G8V8K8P8W8B/out-0.png'); } /* CEO Portrait base */
+        .portrait-tech { background-image: url('https://replicate.delivery/pbxt/HlY7R23Gq9K29q6p9s8w8b8F8T8K8U8X8R8G8V8K8P8W8B/out-0.png'); } /* CTO - Placeholder in same style */
+        .portrait-ops { background-image: url('https://replicate.delivery/pbxt/HlY7R23Gq9K29q6p9s8w8b8F8T8K8U8X8R8G8V8K8P8W8B/out-0.png'); } /* COO - Placeholder in same style */
+        .portrait-growth { background-image: url('https://replicate.delivery/pbxt/HlY7R23Gq9K29q6p9s8w8b8F8T8K8U8X8R8G8V8K8P8W8B/out-0.png'); } /* VP Growth - Placeholder */
+
+        .member-info {
+            padding: 0.5vh;
+        }
+
+        .member-name {
+            font-size: 1.3vh;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .member-role {
+            font-size: 1.1vh;
+            color: var(--main-accent);
+            text-transform: uppercase;
+        }
+
+        .member-status {
+            position: absolute;
+            top: 0.5vh;
+            right: 0.5vh;
+            font-size: 1.1vh;
+            padding: 0.1vh 0.4vh;
+            border-radius: 2px;
+            background: rgba(0,255,0,0.3);
+            color: #fff;
+        }
+
+        /* --- 3. LARGE CENTRAL CHARACTER (Main Founder / Advisor) --- */
+        .main-character-anchor {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            height: 95%; /* Size of character on screen */
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            z-index: 10;
+        }
+
+        /* The CEO image. This is the premium art requirement. We use the original CEO image reference URL. */
+        .main-character-img {
+            max-height: 100%;
+            height: auto;
+            width: auto;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Dialogue Box overlay (Match lower action zone interaction) */
+        .dialogue-overlay {
+            position: absolute;
+            bottom: 20vh;
+            left: 20%;
+            right: 20%;
+            height: 15vh;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            z-index: 12;
+            padding: 2vh;
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 2vh;
+        }
+
+        .dialogue-portrait {
+            width: 10vh;
+            height: 10vh;
+            background-image: url('https://replicate.delivery/pbxt/HlY7R23Gq9K29q6p9s8w8b8F8T8K8U8X8R8G8V8K8P8W8B/out-0.png');
+            background-size: cover;
+            background-position: center 20%; /* Top focus */
+            border-radius: 50%;
+            border: 2px solid var(--main-accent);
+        }
+
+        .dialogue-text-area {
+            flex-grow: 1;
+        }
+
+        .dialogue-speaker {
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 1.5vh;
+            margin-bottom: 0.5vh;
+        }
+
+        .dialogue-body {
+            font-size: 1.7vh;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+
+        /* --- 4. RIGHT MISSION BRIEFING PANEL --- */
+        .mission-panel {
+            position: absolute;
+            top: 10vh;
+            right: 1vw;
+            width: 25vw;
+            max-height: 60vh;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            z-index: 90;
+            padding: 1.5vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mission-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1vh;
+            margin-bottom: 1vh;
+        }
+
+        .mission-objective-title {
+            font-size: 2vh;
+            font-weight: 700;
+            color: var(--main-accent);
+            text-transform: uppercase;
+        }
+
+        .mission-objective-desc {
+            font-size: 1.4vh;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .mission-tasks {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 1vh;
+            scrollbar-width: thin;
+        }
+
+        .mission-tasks::-webkit-scrollbar {
+            width: 3px;
+        }
+        .mission-tasks::-webkit-scrollbar-thumb {
+            background-color: var(--main-accent);
+        }
+
+        .task-item {
+            display: flex;
+            gap: 1vw;
+            padding: 1vh;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            align-items: center;
+        }
+
+        .task-icon {
+            font-size: 2.5vh;
+            color: var(--main-accent);
+        }
+
+        .task-detail {
+            flex-grow: 1;
+        }
+
+        .task-title {
+            font-size: 1.5vh;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .task-brief {
+            font-size: 1.2vh;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .task-progress {
+            font-size: 1.4vh;
+            font-weight: 700;
+            color: var(--main-accent);
+            white-space: nowrap;
+        }
+
+        /* --- 5. LOWER ACTION ZONE / Bottom Navigation --- */
+        .hud-bottom {
+            position: absolute;
+            bottom: 1vh;
+            left: 1vw;
+            right: 1vw;
+            height: 15vh;
+            z-index: 100;
+            display: flex;
+            gap: 1vw;
+        }
+
+        /* Action Commands Panel (3 per Month) */
+        .action-commands-panel {
+            flex-grow: 1;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            padding: 1vh;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1vw;
+        }
+
+        .action-button {
+            background: rgba(10, 30, 50, 0.7);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 4px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5vh;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-button:hover {
+            border-color: var(--main-accent);
+            background-color: rgba(0, 242, 255, 0.1);
+        }
+
+        .action-button:active {
+            transform: scale(0.98);
+        }
+
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .action-type {
+            font-size: 1.2vh;
+            text-transform: uppercase;
+            color: var(--main-accent);
+        }
+
+        .action-cost {
+            font-size: 1.4vh;
+            font-weight: 700;
+        }
+
+        .action-title {
+            font-size: 1.6vh;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .action-effect {
+            font-size: 1.1vh;
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            min-height: 2.8vh; /* 2 lines max */
+        }
+
+        .next-turn-container {
+            width: 12vw;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            padding: 1vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-next-turn {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.4) 0%, rgba(0, 119, 128, 0.4) 100%);
+            border: 2px solid var(--main-accent);
+            border-radius: 4px;
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1.6vh;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-next-turn:hover {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.6) 0%, rgba(0, 119, 128, 0.6) 100%);
+        }
+
+        /* --- UI Modals & Overlays --- */
+        .ui-modal {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            pointer-events: auto;
+        }
+
+        .result-panel {
+            width: 35vw;
+            background: var(--panel-bg);
+            border: 2px solid var(--main-accent);
+            border-radius: 4px;
+            padding: 2.5vh;
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .result-title {
+            font-size: 2.5vh;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 2vh;
+            text-transform: uppercase;
+        }
+
+        .result-impact {
+            margin-bottom: 2vh;
+        }
+
+        .impact-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.8vh;
+            padding: 0.5vh 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .impact-label { color: var(--text-color); }
+        .impact-value.neg { color: var(--negative-value); font-weight: 700;}
+        .impact-value.pos { color: var(--positive-value); font-weight: 700;}
+
+        .btn-dismiss {
+            width: 100%;
+            padding: 1.5vh;
+            background-color: rgba(0, 242, 255, 0.2);
+            border: 1px solid var(--main-accent);
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1.6vh;
+            cursor: pointer;
+            margin-top: 1vh;
+        }
+
+        .btn-dismiss:hover {
+            background-color: rgba(0, 242, 255, 0.4);
+        }
+
+        /* Final state over */
+        .game-over-panel {
+            text-align: center;
+            padding: 5vh;
+        }
+        .game-over-title { color: var(--main-accent); font-size: 4vh; }
+
+    </style>
 </head>
 <body>
-<div id="bg">
-  <div class="orb" style="width:300px;height:300px;background:rgba(30,60,160,.12);top:-80px;right:-60px;--dx:-20px;--dy:30px;animation-duration:12s;"></div>
-  <div class="orb" style="width:200px;height:200px;background:rgba(120,20,20,.1);bottom:100px;left:-60px;--dx:15px;--dy:-25px;animation-duration:9s;"></div>
-</div>
-<div id="app">
 
-  <div id="topbar">
-    <div class="tb1">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="logo">OPC · BIZ SIM</span>
-        <span class="chap-pill" id="chap-pill">第一章 · 創業陣痛</span>
-      </div>
-      <div class="mbadge"><div class="mdot"></div><span id="hud-month">第 3 月</span></div>
-    </div>
-    <div class="tb-player">
-      <div class="pav">👔</div>
-      <div class="pinfo">
-        <div class="pname">張嘉麟 CEO</div>
-        <div class="plv">
-          <span class="lvb">LV.4</span>
-          <div class="expw"><div class="expf" id="expf" style="width:62%"></div></div>
-          <span class="expt" id="expt">620/1000</span>
+<div class="stage">
+
+    <header class="hud-top">
+        <div class="hud-left">
+            <div class="logo-area">FOUNDER OPERATIVE</div>
+            <div class="hud-item">
+                <div class="hud-label">RUNWAY</div>
+                <div class="hud-value value-danger" id="runway">6 MO</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">CASH-FLOW</div>
+                <div class="hud-value value-money" id="cashflow">+$2.1K</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">BURN</div>
+                <div class="hud-value value-danger" id="burn">-$14.5K</div>
+            </div>
         </div>
-      </div>
-      <div class="coinw"><span style="font-size:11px;">🪙</span><span class="coinv" id="coinv">2,480</span></div>
-    </div>
-  </div>
+        
+        <div class="hud-right">
+            <div class="hud-item">
+                <div class="hud-label">MOMENTUM</div>
+                <div class="hud-value" id="momentum">48%</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">MORALE</div>
+                <div class="hud-value" id="morale">62%</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">CASH RESERVE</div>
+                <div class="hud-value value-money" id="cash">$87.2K</div>
+            </div>
+            <div class="time-display">
+                <div class="current-month" id="month">JAN / 2024</div>
+                <div class="next-event">BOARD REVIEW [3 MO]</div>
+            </div>
+        </div>
+    </header>
 
-  <div id="hud">
-    <div class="hgrid">
-      <div class="hc hc-ca"><div class="hl">現金流目標</div><div class="hv" id="vcash">$4.2M</div><div class="hb"><div class="hbf" id="bcash" style="width:65%"></div></div></div>
-      <div class="hc hc-rv"><div class="hl">營收/支出</div><div class="hv" id="vrev">+28%</div><div class="hb"><div class="hbf" id="brev" style="width:72%"></div></div></div>
-      <div class="hc hc-st"><div class="hl">壓力指數</div><div class="hv" id="vstress">48</div><div class="hb"><div class="hbf" id="bstress" style="width:48%"></div></div></div>
-      <div class="hc hc-sb"><div class="hl">穩定度</div><div class="hv" id="vstable">80%</div><div class="hb"><div class="hbf" id="bstable" style="width:80%"></div></div></div>
-    </div>
-  </div>
+    <aside class="squad-column">
+        <h2 class="squad-title">EXEC TEAM</h2>
+        
+        <div class="squad-member selected">
+            <div class="squad-portrait-container portrait-fin"></div>
+            <div class="member-status">READY</div>
+            <div class="member-info">
+                <div class="member-name">SARAH CHEN</div>
+                <div class="member-role">FINANCIAL OPERATOR</div>
+            </div>
+        </div>
 
-  <div id="mid">
-    <div class="caura"></div>
-    <div id="cw">
-      <svg viewBox="0 0 195 430" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="gsk" cx="50%" cy="38%" r="52%"><stop offset="0%" stop-color="#fce8cc"/><stop offset="100%" stop-color="#d4a070"/></radialGradient>
-          <linearGradient id="gst" x1="0%" y1="0%" x2="20%" y2="100%"><stop offset="0%" stop-color="#1e2c4c"/><stop offset="45%" stop-color="#111a2e"/><stop offset="100%" stop-color="#08101e"/></linearGradient>
-          <linearGradient id="gti" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f8d870"/><stop offset="100%" stop-color="#b87020"/></linearGradient>
-          <linearGradient id="gsh" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#eaf0fa"/><stop offset="100%" stop-color="#c4d0e6"/></linearGradient>
-          <linearGradient id="ghr" x1="20%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2c1c0a"/><stop offset="100%" stop-color="#120802"/></linearGradient>
-          <linearGradient id="glg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#141c30"/><stop offset="100%" stop-color="#080e1c"/></linearGradient>
-          <linearGradient id="gau" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="rgba(75,140,232,0.4)"/><stop offset="100%" stop-color="rgba(75,140,232,0)"/></linearGradient>
-          <radialGradient id="gey" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#c8e8ff"/><stop offset="55%" stop-color="#2858b0"/><stop offset="100%" stop-color="#0c1830"/></radialGradient>
-          <linearGradient id="gta" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#181e30"/><stop offset="100%" stop-color="#101828"/></linearGradient>
-          <filter id="fgl"><feGaussianBlur stdDeviation="3" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
-          <filter id="fglo"><feGaussianBlur stdDeviation="6"/></filter>
-        </defs>
-        <ellipse cx="95" cy="426" rx="65" ry="6" fill="rgba(75,140,232,0.2)" filter="url(#fglo)"/>
-        <ellipse cx="95" cy="427" rx="48" ry="5" fill="rgba(0,0,0,0.6)"/>
-        <ellipse cx="95" cy="260" rx="78" ry="160" fill="url(#gau)" opacity="0.35"/>
-        <rect x="57" y="288" width="33" height="140" rx="6" fill="url(#glg)"/>
-        <rect x="98" y="288" width="33" height="140" rx="6" fill="url(#glg)"/>
-        <path d="M53 415 Q73 407 95 415 L95 425 Q73 428 53 425 Z" fill="#0a0e1c"/>
-        <ellipse cx="74" cy="423" rx="22" ry="6" fill="#080c18"/>
-        <path d="M93 415 Q113 407 135 415 L135 425 Q113 428 93 425 Z" fill="#0a0e1c"/>
-        <ellipse cx="114" cy="423" rx="22" ry="6" fill="#080c18"/>
-        <path d="M26 162 Q31 136 60 130 L95 148 L130 130 Q159 136 164 162 L172 292 L18 292 Z" fill="url(#gst)"/>
-        <path d="M95 148 L82 175 L82 234 L108 234 L108 175 Z" fill="url(#gsh)"/>
-        <path d="M90 154 L95 148 L100 154 L104 216 L95 227 L86 216 Z" fill="url(#gti)"/>
-        <path d="M91 148 L99 148 L95 161 Z" fill="#906010"/>
-        <rect x="88" y="196" width="14" height="3.5" rx="1.75" fill="#e8b84b" opacity="0.85"/>
-        <path d="M95 148 L70 178 L62 230 L95 220 Z" fill="#1c2840" opacity="0.9"/>
-        <path d="M95 148 L120 178 L128 230 L95 220 Z" fill="#1c2840" opacity="0.9"/>
-        <path d="M95 148 L70 178 L62 230" fill="none" stroke="rgba(232,184,75,0.15)" stroke-width="1"/>
-        <path d="M95 148 L120 178 L128 230" fill="none" stroke="rgba(232,184,75,0.15)" stroke-width="1"/>
-        <path d="M122 170 L138 167 L140 179 L126 179 Z" fill="#f8d870" opacity="0.8"/>
-        <circle cx="95" cy="185" r="2" fill="rgba(200,210,230,0.5)"/>
-        <circle cx="95" cy="198" r="2" fill="rgba(200,210,230,0.4)"/>
-        <circle cx="95" cy="211" r="2" fill="rgba(200,210,230,0.3)"/>
-        <path d="M26 162 Q5 184 10 246 Q14 268 33 272 L52 257 Q37 236 39 204 L60 186 Z" fill="url(#gst)"/>
-        <rect x="4" y="218" width="48" height="66" rx="5" fill="#060a14" stroke="#e8b84b" stroke-width="1.2"/>
-        <rect x="7" y="221" width="42" height="56" rx="3" fill="url(#gta)"/>
-        <line x1="10" y1="230" x2="46" y2="230" stroke="#4b8ce8" stroke-width="1.2" opacity="0.7"/>
-        <line x1="10" y1="237" x2="38" y2="237" stroke="#4b8ce8" stroke-width="0.8" opacity="0.4"/>
-        <rect x="10" y="242" width="12" height="10" rx="2" fill="#4be8c8" opacity="0.55"/>
-        <rect x="25" y="247" width="11" height="7" rx="2" fill="#e8b84b" opacity="0.6"/>
-        <rect x="38" y="245" width="8" height="9" rx="2" fill="#4be88c" opacity="0.45"/>
-        <rect x="10" y="256" width="36" height="2" rx="1" fill="#4b8ce8" opacity="0.4"/>
-        <rect x="10" y="260" width="28" height="2" rx="1" fill="#4b8ce8" opacity="0.25"/>
-        <rect x="10" y="264" width="20" height="5" rx="1.5" fill="#4be88c" opacity="0.45"/>
-        <rect x="4" y="218" width="48" height="66" rx="5" fill="none" stroke="rgba(75,140,232,0.35)" stroke-width="2.5" filter="url(#fgl)"/>
-        <path d="M164 162 Q184 176 180 222 Q177 244 162 249 L150 236 Q161 222 159 197 L136 180 Z" fill="url(#gst)"/>
-        <ellipse cx="156" cy="244" rx="13" ry="11" fill="url(#gsk)"/>
-        <rect x="84" y="100" width="22" height="38" rx="9" fill="url(#gsk)"/>
-        <ellipse cx="95" cy="80" rx="37" ry="41" fill="url(#gsk)"/>
-        <path d="M59 66 Q65 30 95 24 Q125 30 131 66 Q118 46 95 44 Q72 46 59 66 Z" fill="url(#ghr)"/>
-        <path d="M59 66 Q53 80 56 98 Q62 88 66 76 Z" fill="url(#ghr)"/>
-        <path d="M131 66 Q137 80 134 98 Q128 88 124 76 Z" fill="url(#ghr)"/>
-        <ellipse cx="58" cy="81" rx="7.5" ry="9" fill="url(#gsk)"/>
-        <ellipse cx="132" cy="81" rx="7.5" ry="9" fill="url(#gsk)"/>
-        <ellipse cx="80" cy="79" rx="11" ry="8.5" fill="white"/>
-        <ellipse cx="110" cy="79" rx="11" ry="8.5" fill="white"/>
-        <ellipse cx="81" cy="80" rx="7.5" ry="7.5" fill="url(#gey)"/>
-        <ellipse cx="111" cy="80" rx="7.5" ry="7.5" fill="url(#gey)"/>
-        <ellipse cx="81" cy="80" rx="4" ry="4" fill="#060c1e"/>
-        <ellipse cx="111" cy="80" rx="4" ry="4" fill="#060c1e"/>
-        <ellipse cx="83" cy="77" rx="1.8" ry="1.8" fill="white" opacity="0.95"/>
-        <ellipse cx="113" cy="77" rx="1.8" ry="1.8" fill="white" opacity="0.95"/>
-        <path d="M71 69 Q80 64 91 68" stroke="#281408" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-        <path d="M101 68 Q110 64 121 69" stroke="#281408" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-        <path d="M91 89 Q95 96 99 89" stroke="#c09060" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M84 101 Q95 110 106 101" stroke="#c07060" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <rect x="70" y="73" width="23" height="15" rx="5.5" fill="rgba(75,140,232,0.07)" stroke="#5878a8" stroke-width="1.5" opacity="0.8"/>
-        <rect x="100" y="73" width="23" height="15" rx="5.5" fill="rgba(75,140,232,0.07)" stroke="#5878a8" stroke-width="1.5" opacity="0.8"/>
-        <line x1="93" y1="79.5" x2="100" y2="79.5" stroke="#5878a8" stroke-width="1.5" opacity="0.8"/>
-        <line x1="58" y1="78" x2="70" y2="77" stroke="#5878a8" stroke-width="1.2" opacity="0.6"/>
-        <line x1="123" y1="77" x2="133" y2="78" stroke="#5878a8" stroke-width="1.2" opacity="0.6"/>
-        <path d="M72 75 L78 75 L76 79" fill="rgba(255,255,255,0.12)"/>
-        <path d="M102 75 L108 75 L106 79" fill="rgba(255,255,255,0.12)"/>
-      </svg>
+        <div class="squad-member">
+            <div class="squad-portrait-container portrait-tech"></div>
+            <div class="member-status">BUSY</div>
+            <div class="member-info">
+                <div class="member-name">KENJI TANAKA</div>
+                <div class="member-role">AI / ENGINEERING</div>
+            </div>
+        </div>
+
+        <div class="squad-member">
+            <div class="squad-portrait-container portrait-ops"></div>
+            <div class="member-status">READY</div>
+            <div class="member-info">
+                <div class="member-name">MARCUS REED</div>
+                <div class="member-role">OPERATIONS</div>
+            </div>
+        </div>
+
+        <div class="squad-member">
+            <div class="squad-portrait-container portrait-growth"></div>
+            <div class="member-status">READY</div>
+            <div class="member-info">
+                <div class="member-name">LEILA KAUR</div>
+                <div class="member-role">GROWTH / ACQUISITION</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-character-anchor">
+        <img src="https://replicate.delivery/pbxt/HlY7R23Gq9K29q6p9s8w8b8F8T8K8U8X8R8G8V8K8P8W8B/out-0.png" 
+             alt="Founder / CEO" 
+             class="main-character-img">
+    </main>
+
+    <div class="dialogue-overlay" id="dialogueBox">
+        <div class="dialogue-portrait"></div>
+        <div class="dialogue-text-area">
+            <div class="dialogue-speaker">SARAH CHEN [FOUNDER]</div>
+            <div class="dialogue-body" id="dialogueText">"Current monthly burn is too high. The new High-Ticket offer needs traction, or we run dry in 6 months. What's the priority for January?"</div>
+        </div>
     </div>
 
-```
-<div id="ep">
-  <div class="ephdr">
-    <span class="ebadge crisis" id="ebadge">CRISIS</span>
-    <div class="estars" id="estars"><span class="estr">⭐</span><span class="estr">⭐</span><span class="estr">⭐</span></div>
-  </div>
-  <div class="ecard">
-    <div class="shimmer"></div>
-    <div class="etags" id="etags"><span class="etag tc">危機</span><span class="etag tu">緊急</span><span class="etag tf">財務</span></div>
-    <div class="etitle" id="etitle">主力客戶要求<br>延遲付款 60 天</div>
-    <div class="edesc" id="edesc">佔營收 40% 的 A 客戶突然要求將帳期從 Net-30 改為 Net-90，財務長警告現金流恐在 6 週內見底。</div>
-    <div class="eimps" id="eimps">
-      <div class="imp"><span class="ii">💰</span><span class="it">現金流</span><span class="iv neg">−$1.2M</span></div>
-      <div class="imp"><span class="ii">⚡</span><span class="it">壓力</span><span class="iv neg">+22</span></div>
-      <div class="imp"><span class="ii">🤝</span><span class="it">客戶關係</span><span class="iv pos">+8</span></div>
-      <div class="imp"><span class="ii">⏱</span><span class="it">時限</span><span class="iv neg">48hr</span></div>
+    <aside class="mission-panel">
+        <div class="mission-header">
+            <div class="mission-objective-title">Current Objective</div>
+            <div class="mission-objective-desc">Improve Runway & Achieve Cash-Flow Positive</div>
+        </div>
+        <div class="mission-tasks">
+            <div class="task-item">
+                <div class="task-icon">🗹</div>
+                <div class="task-detail">
+                    <div class="task-title">Protect Morale</div>
+                    <div class="task-brief">Burn and high stress are risking key team retention.</div>
+                </div>
+                <div class="task-progress">62%</div>
+            </div>
+            <div class="task-item">
+                <div class="task-icon">🗹</div>
+                <div class="task-detail">
+                    <div class="task-title">High-Ticket Traction</div>
+                    <div class="task-brief">Verify the momentum on the premium offer.</div>
+                </div>
+                <div class="task-progress">12%</div>
+            </div>
+            <div class="task-item">
+                <div class="task-icon">🗹</div>
+                <div class="task-detail">
+                    <div class="task-title">Leverage AI</div>
+                    <div class="task-brief">Cut administrative overhead.</div>
+                </div>
+                <div class="task-progress">0%</div>
+            </div>
+        </div>
+        <div class="active-effect">
+            <div class="hud-label">ACTIVE EVENT:</div>
+            <div style="font-size:1.3vh; color:var(--negative-value);">HIGH BURN HAZARD [-4 Runway Mo]</div>
+        </div>
+    </aside>
+
+    <footer class="hud-bottom">
+        <div class="action-commands-panel" id="actionCommands">
+            </div>
+
+        <div class="next-turn-container">
+            <button class="btn-next-turn" id="endTurnBtn">
+                END MONTH
+                <div class="hud-label">EXECUTE ACTIONS</div>
+            </button>
+        </div>
+    </footer>
+
+    <div class="ui-modal" id="resultModal">
+        <div class="result-panel">
+            <div class="result-title" id="resultTitle">Monthly Results</div>
+            <div class="result-impact" id="resultImpact">
+                </div>
+            <p id="resultStory" style="font-size: 1.5vh; margin-bottom: 2vh; line-height:1.3; color:#fff;"></p>
+            <button class="btn-dismiss" id="dismissResult">ACKNOWLEDGE (MONTH +1)</button>
+        </div>
     </div>
-  </div>
-</div>
 
-<div id="combo"><div class="cnum" id="cnum">3</div><div class="ctxt">COMBO</div></div>
-```
-
-  </div>
-
-  <div id="az">
-    <div class="abox">
-      <div class="ahdr">
-        <div class="aav">🧠</div>
-        <div style="flex:1"><div class="anm">陳顧問・首席策略師</div><div class="arl">CFO ADVISOR · LV.7 · 勝率 83%</div></div>
-        <div class="ast"><div class="adot"></div>分析中</div>
-      </div>
-      <div class="atxt" id="atxt">現金流陷阱——接受等於把主動權拱手相讓。建議先動用備用信貸額度撐過缺口，同時要求對方提供採購訂單作擔保<span id="acur"></span></div>
-    </div>
-  </div>
-
-  <div id="actions">
-    <button class="abt abt-a" id="btn0" onclick="choose(0)"><div class="ndot"></div><span class="acorn">HIGH</span><span class="aico">🏦</span><span class="albl">動用備用<br>信貸額度</span><span class="asub">風險 ★★☆</span></button>
-    <button class="abt abt-b" id="btn1" onclick="choose(1)"><span class="acorn">MED</span><span class="aico">🤝</span><span class="albl">接受並<br>重議條款</span><span class="asub">風險 ★☆☆</span></button>
-    <button class="abt abt-c" id="btn2" onclick="choose(2)"><span class="acorn">LOW</span><span class="aico">⚡</span><span class="albl">啟動緊急<br>應收催收</span><span class="asub">風險 ★★★</span></button>
-  </div>
-</div>
-
-<div id="ov">
-  <div class="rcard">
-    <span class="rico" id="rico">🏦</span>
-    <div class="rgrd gs" id="rgrd">RANK S</div>
-    <div class="rtit" id="rtit">教科書級危機處理！</div>
-    <div class="rdesc" id="rdesc">你動用了備用信貸額度，成功撐過資金缺口。</div>
-    <div class="rchips" id="rchips"></div>
-    <div class="rexp"><span class="expgn" id="expgn">+220 EXP</span><div class="expbr"><div class="expfr" id="expfr" style="width:0%"></div></div><span style="font-size:9px;color:var(--gold);" id="coingn">+180🪙</span></div>
-    <button class="rbtn" onclick="nextEvent()">繼續下一幕 ▶</button>
-  </div>
-</div>
-
-<div id="toast">
-  <div class="tinn">
-    <span class="tico" id="tico">🏆</span>
-    <div><div class="ttit" id="ttit">成就解鎖！</div><div class="tsub" id="tsub">首次危機處理</div></div>
-  </div>
 </div>
 
 <script>
-const EVENTS=[
-  {badge:'CRISIS',bcls:'crisis',chap:'第一章 · 創業陣痛',stars:3,
-   tags:[{c:'tc',t:'危機'},{c:'tu',t:'緊急'},{c:'tf',t:'財務'}],
-   title:'主力客戶要求<br>延遲付款 60 天',
-   desc:'佔營收 40% 的 A 客戶突然要求將帳期從 Net-30 改為 Net-90，財務長警告現金流恐在 6 週內見底。',
-   imps:[['💰','現金流','−$1.2M','neg'],['⚡','壓力','+22','neg'],['🤝','客戶關係','+8','pos'],['⏱','時限','48hr','neg']],
-   advice:'現金流陷阱——接受等於把主動權拱手相讓。建議先動用備用信貸額度撐過缺口，同時要求對方提供採購訂單作擔保',
-   choices:[
-    {ico:'🏦',lbl:'動用備用\n信貸額度',cor:'HIGH',sub:'風險 ★★☆',
-     r:{ico:'🏦',grd:'RANK S',gcls:'gs',tit:'教科書級危機處理！',
-      desc:'你動用備用信貸額度，成功撐過資金缺口，同時保住了客戶關係。財務長讚許此決策展現了專業的流動性管理。',
-      chips:[{c:'cp',t:'現金流 ＋穩定'},{c:'cn',t:'利潤 −8%'},{c:'cp',t:'壓力 −10'}],
-      exp:220,coins:180,s:{ca:'$4.8M',rv:'+24%',st:'38',sb:'82%',cb:70,rb:68,sb2:38,stb:82}}},
-    {ico:'🤝',lbl:'接受並\n重議條款',cor:'MED',sub:'風險 ★☆☆',
-     r:{ico:'🤝',grd:'RANK A',gcls:'ga',tit:'協議達成',
-      desc:'重議後取得 Net-60 折衷方案，客戶關係改善，但現金週轉依然吃緊，需密切監控下季現金流。',
-      chips:[{c:'cn',t:'現金流 吃緊'},{c:'cp',t:'客戶關係 +12'},{c:'cn',t:'壓力 +8'}],
-      exp:150,coins:100,s:{ca:'$3.5M',rv:'+18%',st:'56',sb:'72%',cb:52,rb:58,sb2:56,stb:72}}},
-    {ico:'⚡',lbl:'啟動緊急\n應收催收',cor:'LOW',sub:'風險 ★★★',
-     r:{ico:'⚡',grd:'RANK B',gcls:'gb',tit:'催收行動展開',
-      desc:'法務施壓後對方同意維持原帳期，但雙方關係趨於緊張，未來合約恐面臨重新談判甚至流失風險。',
-      chips:[{c:'cp',t:'帳期維持'},{c:'cn',t:'客戶關係 −18'},{c:'cn',t:'壓力 +30'}],
-      exp:100,coins:60,s:{ca:'$4.2M',rv:'+28%',st:'72',sb:'60%',cb:65,rb:72,sb2:72,stb:60}}},
-   ]},
-  {badge:'OPPTY',bcls:'oppty',chap:'第一章 · 創業陣痛',stars:4,
-   tags:[{c:'to',t:'機會'},{c:'tu',t:'限時'},{c:'th',t:'戰略'}],
-   title:'競爭對手陷入<br>財務危機出售資產',
-   desc:'最大競爭對手 B 公司資金周轉不靈，正以市值 3 折拋售其核心技術專利包，窗口只有 72 小時。',
-   imps:[['💎','戰略價值','極高','pos'],['💰','資金需求','$2.8M','neg'],['🏆','市占率','+15%','pos'],['⏱','時限','72hr','neg']],
-   advice:'這種機會百年難遇！專利包估值保守計算有 3 倍套利空間。關鍵在資金，建議考慮戰略投資人共同入股降低風險',
-   choices:[
-    {ico:'💎',lbl:'全額收購\n專利包',cor:'HIGH',sub:'風險 ★★★',
-     r:{ico:'💎',grd:'RANK S',gcls:'gs',tit:'史詩級戰略收購！',
-      desc:'成功取得競爭對手核心專利，技術壁壘大幅提升，市占率預計下季突破 35%。董事會讚不絕口。',
-      chips:[{c:'cp',t:'技術壁壘 ＋強'},{c:'cn',t:'現金 −$2.8M'},{c:'cp',t:'估值 ×1.8'}],
-      exp:280,coins:240,s:{ca:'$2.1M',rv:'+45%',st:'62',sb:'78%',cb:40,rb:88,sb2:62,stb:78}}},
-    {ico:'🤝',lbl:'聯合投資人\n共同入股',cor:'MED',sub:'風險 ★★☆',
-     r:{ico:'🤝',grd:'RANK A',gcls:'ga',tit:'聯投協議簽署',
-      desc:'與 VC 共同持股，稀釋 20% 股權，但大幅降低財務風險並引入豐富的產業資源網絡。',
-      chips:[{c:'cp',t:'財務風險 ↓'},{c:'cn',t:'股權稀釋 −20%'},{c:'cp',t:'資源網絡 ＋'}],
-      exp:190,coins:140,s:{ca:'$3.8M',rv:'+35%',st:'40',sb:'85%',cb:62,rb:78,sb2:40,stb:85}}},
-    {ico:'🚫',lbl:'放棄此次\n機會',cor:'LOW',sub:'風險 ★☆☆',
-     r:{ico:'🚫',grd:'RANK C',gcls:'gc',tit:'保守策略執行',
-      desc:'決定維持現金儲備，競爭對手專利被第三方收購。市場競爭格局正在悄然改變，機會一去不復返。',
-      chips:[{c:'cp',t:'現金安全'},{c:'cn',t:'市占率停滯'},{c:'cn',t:'競爭壓力 ↑'}],
-      exp:80,coins:50,s:{ca:'$4.5M',rv:'+20%',st:'28',sb:'70%',cb:75,rb:62,sb2:28,stb:70}}},
-   ]},
-  {badge:'ALERT',bcls:'alert',chap:'第二章 · 成長瓶頸',stars:5,
-   tags:[{c:'tc',t:'人才'},{c:'tu',t:'緊急'},{c:'tf',t:'重組'}],
-   title:'核心技術團隊<br>集體跳槽競爭對手',
-   desc:'CTO 帶領 5 名核心工程師宣布離職，加入昨日被收購的競爭對手，下季產品路線圖面臨全面延宕。',
-   imps:[['👥','人才流失','5人','neg'],['📅','產品延遲','3個月','neg'],['💰','重組成本','$800K','neg'],['📉','股東信心','−25','neg']],
-   advice:'人走了不代表全盤輸。現在最重要的是穩住留下來的人，立即啟動 retention package，並考慮空降有號召力的明星 CTO',
-   choices:[
-    {ico:'👑',lbl:'高薪空降\n明星 CTO',cor:'HIGH',sub:'風險 ★★☆',
-     r:{ico:'👑',grd:'RANK S',gcls:'gs',tit:'明星 CTO 強勢到位！',
-      desc:'以年薪 $450K + 股權成功引入前獨角獸 CTO，團隊信心大幅回升，招募管道全面打通，新品開發提速。',
-      chips:[{c:'cp',t:'團隊信心 ＋高'},{c:'cn',t:'薪資成本 +30%'},{c:'cp',t:'招募號召力 ↑'}],
-      exp:240,coins:200,s:{ca:'$3.2M',rv:'+22%',st:'55',sb:'76%',cb:55,rb:65,sb2:55,stb:76}}},
-    {ico:'🌱',lbl:'內部晉升\n穩定軍心',cor:'MED',sub:'風險 ★★☆',
-     r:{ico:'🌱',grd:'RANK A',gcls:'ga',tit:'內部接班成功',
-      desc:'資深工程師晉升 CTO，士氣回穩，文化延續性好，但技術視野與外部資源相對受限需持續補強。',
-      chips:[{c:'cp',t:'士氣 ＋穩定'},{c:'cp',t:'成本可控'},{c:'cn',t:'技術視野 限制'}],
-      exp:170,coins:120,s:{ca:'$4.0M',rv:'+20%',st:'42',sb:'80%',cb:68,rb:62,sb2:42,stb:80}}},
-    {ico:'🤝',lbl:'外包過渡\n平穩交接',cor:'LOW',sub:'風險 ★★★',
-     r:{ico:'🤝',grd:'RANK B',gcls:'gb',tit:'外包過渡啟動',
-      desc:'臨時引入外包顧問團隊，產品延遲壓縮至 6 週，但核心技術外洩風險上升，文化整合困難重重。',
-      chips:[{c:'cn',t:'技術洩漏風險'},{c:'cp',t:'延遲縮短'},{c:'cn',t:'文化整合困難'}],
-      exp:110,coins:70,s:{ca:'$3.8M',rv:'+16%',st:'68',sb:'58%',cb:62,rb:52,sb2:68,stb:58}}},
-   ]},
-];
+    // 1. Database - Chapter / Month Data
+    const gameState = {
+        month: 0,
+        money: 87200,
+        burn: -14500,
+        cashflow: 2100,
+        runway: 6,
+        morale: 62,
+        momentum: 48,
+        data: {
+            months: ["JANUARY", "FEBRUARY", "MARCH"],
+            dialogue: [
+                "Current monthly burn is too high. The new High-Ticket offer needs traction, or we run dry in 6 months. How do we secure the momentum?",
+                "We’ve secured some momentum, but morale is sagging. High churn risk among engineers. Do we cut burn or secure retention?",
+                "The board review is this month. The new AI integration is showing promise. We must deliver results on the High-Ticket product.",
+                "Game Over. Check the board review results."
+            ],
+            actions: [
+                // JANUARY
+                [
+                    { id: 'cut_mkt', type: 'BURN CUT', cost: '$0', title: 'Pause Mkt Spend', effect: '-$8k Burn. Hits Momentum.', f: (s) => { s.burn += 8000; s.momentum -= 15; return "Pause Mkt: Burn reduced, but growth slowed."; } },
+                    { id: 'ai_ops', type: 'OPEX LEVERAGE', cost: '$10k', title: 'Implement AI Ops', effect: '$-3K Burn. Long-term efficiency.', f: (s) => { s.money -= 10000; s.burn += 3000; s.momentum += 5; s. morale += 5; return "AI implemented: Cut operational burn."; } },
+                    { id: 'ht_focus', type: 'REVENUE FOCUS', cost: '$5k', title: 'Aggressive High-Ticket Push', effect: 'Boost High-Ticket Progress. Hit morale.', f: (s) => { s.money -= 5000; s.cashflow += 3000; s.momentum += 20; s.morale -= 10; return "Pushed Offer: Increased cash-flow, lower morale."; } }
+                ],
+                // FEBRUARY
+                [
+                    { id: 'bonuses', type: 'TEAM RETENTION', cost: '$12k', title: 'Issue Retention Bonus', effect: '+25% Morale. Prevents Churn.', f: (s) => { s.money -= 12000; s.morale += 25; s.momentum += 5; return "Bonuses Paid: Team morale stabilized."; } },
+                    { id: 'ai_engineering', type: 'TECH LEVERAGE', cost: '$15k', title: 'Accelerate AI Dev', effect: '++AI Progress. Risk momentum drift.', f: (s) => { s.money -= 15000; s.momentum -= 5; s.morale += 10; return "Accelerated AI: Tech stack strong, focus shifted."; } },
+                    { id: 'outsource', type: 'BURN CUT', cost: '$0', title: 'Outsource Non-Core', effect: '-$6K Burn. Risk product momentum.', f: (s) => { s.burn += 6000; s.momentum -= 15; return "Outsourced: Burn reduced, product risks rose."; } }
+                ],
+                // MARCH
+                [
+                    { id: 'board_ppt', type: 'MOMENTUM FOCUS', cost: '$5k', title: 'Polish Board Pitch', effect: 'Secure Board Confidence. Boost Momentum.', f: (s) => { s.money -= 5000; s.momentum += 15; return "PPT Polished: Momentum high for review."; } },
+                    { id: 'launch', type: 'REVENUE FOCUS', cost: '$10k', title: 'Main Product Launch', effect: '+Cash Flow (??). Risk critical stability.', f: (s) => { s.money -= 10000; s.cashflow += 15000; s.burn += 2000; s.momentum += 10; s.morale -= 10; return "Launched: Cash-flow spiked, burn up."; } },
+                    { id: 'hiring', type: 'OPERATOR SWAP', cost: '$25k', title: 'Hire Senior COO', effect: 'Replace Founder as Operator. Boost Morale.', f: (s) => { s.money -= 25000; s.morale += 20; s.burn -= 2000; return "COO Hired: Founder focused, morale improved."; } }
+                ]
+            ]
+        }
+    };
 
-const ACHV=[
-  {ico:'🏆',tit:'首次危機處理',sub:'完成你的第一個危機事件'},
-  {ico:'💡',tit:'戰略眼光',sub:'抓住限時機會'},
-  {ico:'👑',tit:'領導者本色',sub:'人才危機完美解決'},
-  {ico:'🌟',tit:'連續決策達人',sub:'連續獲得 A 以上評級'},
-];
+    const runResults = []; // Store the text results of the chosen actions.
 
-let cur=0,month=3,combo=0,totalExp=620,totalCoins=2480,typing=null;
+    // 2. UI References
+    const cashDiv = document.getElementById('cash');
+    const cashflowDiv = document.getElementById('cashflow');
+    const burnDiv = document.getElementById('burn');
+    const runwayDiv = document.getElementById('runway');
+    const momentumDiv = document.getElementById('momentum');
+    const moraleDiv = document.getElementById('morale');
+    const monthDiv = document.getElementById('month');
+    const dialogueDiv = document.getElementById('dialogueText');
+    const actionsPanel = document.getElementById('actionCommands');
+    const nextBtn = document.getElementById('endTurnBtn');
 
-function render(idx){
-  const e=EVENTS[idx];
-  document.getElementById('ebadge').textContent=e.badge;
-  document.getElementById('ebadge').className='ebadge '+e.bcls;
-  document.getElementById('chap-pill').textContent=e.chap;
-  document.getElementById('etitle').innerHTML=e.title;
-  document.getElementById('edesc').textContent=e.desc;
-  document.getElementById('estars').innerHTML=
-    Array.from({length:e.stars},(_,i)=>`<span class="estr" style="animation-delay:${i*.2}s">⭐</span>`).join('');
-  document.getElementById('etags').innerHTML=e.tags.map(t=>`<span class="etag ${t.c}">${t.t}</span>`).join('');
-  document.getElementById('eimps').innerHTML=e.imps.map(([i,l,v,c])=>
-    `<div class="imp"><span class="ii">${i}</span><span class="it">${l}</span><span class="iv ${c}">${v}</span></div>`).join('');
-  const clsArr=['abt-a','abt-b','abt-c'];
-  e.choices.forEach((c,i)=>{
-    const b=document.getElementById('btn'+i);
-    b.className='abt '+clsArr[i];
-    b.innerHTML=`${i===0?'<div class="ndot"></div>':''}
-      <span class="acorn">${c.cor}</span>
-      <span class="aico">${c.ico}</span>
-      <span class="albl">${c.lbl.replace('\n','<br>')}</span>
-      <span class="asub">${c.sub}</span>`;
-  });
-  typeAdv(e.advice);
-}
+    // Modals
+    const modal = document.getElementById('resultModal');
+    const resTitle = document.getElementById('resultTitle');
+    const resImpact = document.getElementById('resultImpact');
+    const resStory = document.getElementById('resultStory');
+    const dismissBtn = document.getElementById('dismissResult');
 
-function typeAdv(txt){
-  if(typing)clearInterval(typing);
-  const el=document.getElementById('atxt');
-  let i=0; el.innerHTML='<span id="acur"></span>';
-  typing=setInterval(()=>{
-    el.innerHTML=txt.slice(0,i)+'<span id="acur"></span>';
-    i++; if(i>txt.length)clearInterval(typing);
-  },25);
-}
+    // 3. Render Functions
+    function updateHUD() {
+        // Calculate dynamic runway: cash / |burn - cashflow|
+        const netBurn = Math.abs(gameState.burn - gameState.cashflow);
+        gameState.runway = netBurn > 0 ? Math.floor(gameState.money / netBurn) : 'INF';
+        if (gameState.money < 0) gameState.runway = 0;
 
-function choose(idx){
-  const r=EVENTS[cur].choices[idx].r;
-  combo++;
-  const btn=document.getElementById('btn'+idx);
-  const rect=btn.getBoundingClientRect();
-  burst(rect.left+rect.width/2, rect.top+rect.height/2);
-  document.getElementById('rico').textContent=r.ico;
-  document.getElementById('rgrd').textContent=r.grd;
-  document.getElementById('rgrd').className='rgrd '+r.gcls;
-  document.getElementById('rtit').textContent=r.tit;
-  document.getElementById('rdesc').textContent=r.desc;
-  document.getElementById('rchips').innerHTML=r.chips.map(ch=>`<span class="chip ${ch.c}">${ch.t}</span>`).join('');
-  document.getElementById('expgn').textContent='+'+r.exp+' EXP';
-  document.getElementById('coingn').textContent='+'+r.coins+'🪙';
-  setTimeout(()=>{document.getElementById('expfr').style.width=Math.min(100,((totalExp+r.exp)%1000)/10)+'%';},400);
-  // update HUD
-  const s=r.s;
-  [['vcash','bcash',s.ca,s.cb],['vrev','brev',s.rv,s.rb],
-   ['vstress','bstress',s.st,s.sb2],['vstable','bstable',s.sb,s.stb]].forEach(([v,b,val,pct])=>{
-    document.getElementById(v).textContent=val;
-    document.getElementById(b).style.width=pct+'%';
-    const cell=document.getElementById(v).closest('.hc');
-    cell.classList.add('flash'); setTimeout(()=>cell.classList.remove('flash'),500);
-  });
-  totalExp+=r.exp; totalCoins+=r.coins;
-  document.getElementById('expf').style.width=Math.min(100,totalExp%1000/10)+'%';
-  document.getElementById('expt').textContent=(totalExp%1000)+'/1000';
-  document.getElementById('coinv').textContent=totalCoins.toLocaleString();
-  document.getElementById('ov').classList.add('show');
-  setTimeout(()=>showAchv(cur),1200);
-}
+        cashDiv.textContent = `$${(gameState.money / 1000).toFixed(1)}K`;
+        cashDiv.className = `hud-value ${gameState.money > 0 ? 'value-money' : 'value-danger'}`;
+        
+        cashflowDiv.textContent = `+$${(gameState.cashflow / 1000).toFixed(1)}K`;
+        burnDiv.textContent = `-$${(Math.abs(gameState.burn) / 1000).toFixed(1)}K`;
+        
+        runwayDiv.textContent = `${gameState.runway} MO`;
+        runwayDiv.className = `hud-value ${gameState.runway <= 2 ? 'value-danger' : 'value-money'}`;
+        
+        momentumDiv.textContent = `${gameState.momentum}%`;
+        moraleDiv.textContent = `${gameState.morale}%`;
+        monthDiv.textContent = `${gameState.data.months[gameState.month]} / 2024`;
+    }
 
-function showAchv(i){
-  const a=ACHV[i%ACHV.length];
-  document.getElementById('tico').textContent=a.ico;
-  document.getElementById('ttit').textContent=a.tit;
-  document.getElementById('tsub').textContent=a.sub;
-  const t=document.getElementById('toast');
-  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
-}
+    function renderActions() {
+        actionsPanel.innerHTML = '';
+        if (gameState.month >= gameState.data.months.length) return;
 
-function nextEvent(){
-  document.getElementById('ov').classList.remove('show');
-  if(combo>1){
-    document.getElementById('cnum').textContent=combo;
-    const c=document.getElementById('combo');
-    c.classList.add('show'); setTimeout(()=>c.classList.remove('show'),2000);
-  }
-  month++; document.getElementById('hud-month').textContent='第 '+month+' 月';
-  cur=(cur+1)%EVENTS.length; render(cur);
-}
+        const currentActions = gameState.data.actions[gameState.month];
+        currentActions.forEach(action => {
+            const btn = document.createElement('button');
+            btn.className = 'action-button';
+            btn.innerHTML = `
+                <div class="action-header">
+                    <div class="action-type">${action.type}</div>
+                    <div class="action-cost hud-value ${action.cost === '$0' ? '' : 'value-danger'}">${action.cost}</div>
+                </div>
+                <div class="action-title">${action.title}</div>
+                <div class="action-effect">${action.effect}</div>
+            `;
+            btn.addEventListener('click', () => selectAction(action, btn));
+            actionsPanel.appendChild(btn);
+        });
+    }
 
-function burst(x,y){
-  const cols=['#e8b84b','#f5d47a','#4be8c8','#4b8ce8','#ffffff','#4be88c'];
-  for(let i=0;i<20;i++){
-    const p=document.createElement('div');
-    p.className='bpar';
-    const sz=Math.random()*6+3;
-    const ang=(Math.PI*2/20)*i+Math.random()*.3;
-    const dist=Math.random()*90+40;
-    const col=cols[Math.floor(Math.random()*cols.length)];
-    p.style.cssText=`width:${sz}px;height:${sz}px;background:${col};left:${x}px;top:${y}px;
-      --bx:${Math.cos(ang)*dist}px;--by:${Math.sin(ang)*dist-30}px;
-      animation-duration:${Math.random()*.4+.4}s;box-shadow:0 0 ${sz*2}px ${col};`;
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(),800);
-  }
-}
+    // 4. Interaction Logic
+    let selectedAction = null;
 
-function spawnFloating(){
-  const mid=document.getElementById('mid');
-  const cols=['rgba(232,184,75,','rgba(75,140,232,','rgba(75,232,200,','rgba(255,255,255,','rgba(75,232,140,'];
-  for(let i=0;i<16;i++){
-    const p=document.createElement('div'); p.className='fpar';
-    const s=Math.random()*3+1;
-    p.style.cssText=`width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]}${Math.random()*.5+.1});
-      left:${Math.random()*100}%;bottom:0;--dx:${(Math.random()-.5)*80}px;
-      animation-duration:${Math.random()*9+6}s;animation-delay:${Math.random()*9}s;`;
-    mid.appendChild(p);
-  }
-}
+    function selectAction(action, element) {
+        // Simple 1-per-month logic for this simplified simulator
+        document.querySelectorAll('.action-button').forEach(b => b.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedAction = action;
+        nextBtn.innerHTML = `CONFIRM ${action.title}<div class="hud-label">EXECUTE MONTH</div>`;
+    }
 
-render(0); spawnFloating();
+    function executeMonth() {
+        if (!selectedAction) {
+            alert('Please select a business action for this month.');
+            return;
+        }
+
+        // Run the action function on the gamestate
+        const runText = selectedAction.f(gameState);
+        runResults.push(runText);
+        
+        // Month increment
+        gameState.month++;
+
+        // Process monthly cash flow (Apply burn and cashflow)
+        gameState.money += (gameState.cashflow + gameState.burn);
+
+        // Limit metrics
+        gameState.momentum = Math.max(0, Math.min(100, gameState.momentum));
+        gameState.morale = Math.max(0, Math.min(100, gameState.morale));
+
+        // Display results in Modal
+        showResultModal(runText);
+        
+        // Reset selection
+        selectedAction = null;
+        nextBtn.innerHTML = `END MONTH<div class="hud-label">EXECUTE ACTIONS</div>`;
+    }
+
+    function showResultModal(runText) {
+        modal.style.display = 'flex';
+        resTitle.textContent = `${gameState.data.months[gameState.month-1]} Report`;
+        resStory.textContent = runText;
+        
+        // Impact visualization
+        resImpact.innerHTML = '';
+        // In a real game, this would track the diff. We will simulate it.
+        const addImpact = (label, val) => {
+            const row = document.createElement('div');
+            row.className = 'impact-item';
+            row.innerHTML = `<span class="impact-label">${label}</span><span class="impact-value ${val.startsWith('+') ? 'pos' : 'neg'}">${val}</span>`;
+            resImpact.appendChild(row);
+        };
+
+        addImpact("Cash Reserve", `${(gameState.cashflow + gameState.burn) / 1000 > 0 ? '+' : ''}${( (gameState.cashflow + gameState.burn) / 1000 ).toFixed(1)}K (Monthly)`);
+        if (gameState.runway < 2) addImpact("CRITICAL RUNWAY", `${gameState.runway} MO LEFT`);
+
+        if (gameState.month === gameState.data.months.length) {
+            dismissBtn.textContent = 'VIEW BOARD REVIEW (GAME OVER)';
+        }
+    }
+
+    function dismissModal() {
+        modal.style.display = 'none';
+        
+        if (gameState.month >= gameState.data.months.length) {
+            gameOver();
+            return;
+        }
+
+        updateHUD();
+        renderActions();
+        // Update Dialogue for new month
+        dialogueDiv.textContent = `"${gameState.data.dialogue[gameState.month]}"`;
+    }
+
+    function gameOver() {
+        // Replace panel content for Game Over screen
+        actionsPanel.innerHTML = '<div class="game-over-title">SIMULATION COMPLETE</div>';
+        nextBtn.style.display = 'none';
+        
+        resTitle.textContent = "BOARD REVIEW: RESULTS";
+        resImpact.innerHTML = '';
+        
+        let success = true;
+        if (gameState.money < 0) {
+            resStory.textContent = "Board Review Failed: The venture ran out of capital before the product momentum could secure refinancing.";
+            success = false;
+        } else if (gameState.runway < 3) {
+            resStory.textContent = "Board Review Failed: Confidence is too low. The runway is critical, the operation is unstable.";
+            success = false;
+        } else if (gameState.momentum < 50) {
+             resStory.textContent = "Board Review Failed: Though solvent, product momentum is stagnating. High risk of missing market window.";
+             success = false;
+        } else {
+             resStory.textContent = "Board Review Passed: You secured solvency, protected team morale, and demonstrated AI integration. Capital injection approved.";
+        }
+
+        showFinalSummary(success);
+    }
+
+    function showFinalSummary(success) {
+        modal.style.display = 'flex';
+        resTitle.textContent = success ? "SIMULATION SUCCESS" : "SIMULATION FAILED";
+        dismissBtn.textContent = 'RESTART SIMULATOR';
+        dismissBtn.onclick = () => window.location.reload();
+    }
+
+    // 5. Setup Listeners
+    nextBtn.addEventListener('click', executeMonth);
+    dismissBtn.addEventListener('click', dismissModal);
+
+    // Initial Load
+    updateHUD();
+    renderActions();
+
 </script>
-
 </body>
 </html>
